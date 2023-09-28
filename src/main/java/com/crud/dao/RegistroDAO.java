@@ -1,15 +1,24 @@
 package main.java.com.crud.dao;
 
+import java.util.List;
+
+import main.java.com.crud.model.Registro;
+
+// Interface RegistroDAO que define os métodos que o DAO deve implementar
 public interface RegistroDAO {
-    // Cria um novo registro
-    void criarObjeto(int index, String codigoProjeto, String setor, String valorOrcado,
-            String valorNegociado, String descontoConcedido,
-            String dataAtivacaoLead, String dataInicio,
-            String dataTermino, String responsavel, String status);
 
-    public String toString();
+    // Insere um novo registro no arquivo
+    public void inserir(Registro r);
 
-    public byte[] toByteArray();
+    // Busca um registro pelo id no arquivo
+    public Registro buscar(String codigo);
 
-    public void fromByteArray(byte[] b);
+    // Atualiza um registro no arquivo
+    public void atualizar(Registro r);
+
+    // Exclui um registro no arquivo
+    public void excluir(String codigo);
+
+    // Lista todos os registros válidos do arquivo
+    public List<Registro> listar();
 }

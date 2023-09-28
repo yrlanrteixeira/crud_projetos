@@ -23,7 +23,7 @@ public class Indice {
     // pesquisa no arquivo de index a posição de um id
     public long lerRegistro(byte id) {
         try {
-            RandomAccessFile arq = new RandomAccessFile("src\\main\\java\\com\\crud\\utils\\index.db", "rw");
+            RandomAccessFile arq = new RandomAccessFile("src\\main\\java\\com\\crud\\utils\\ProjetosBase.db", "rw");
             long low = 0, high = arq.length() / 9, mid;
             byte idArq;
             // nosso índex sempre estará ordenado, então podemos ir para o meio do arquivo e
@@ -52,7 +52,7 @@ public class Indice {
     public void deletaRegistro(byte id) {
         long posId;
         try {
-            RandomAccessFile arq = new RandomAccessFile("src\\main\\java\\com\\crud\\utils\\index.db", "rw");
+            RandomAccessFile arq = new RandomAccessFile("src\\main\\java\\com\\crud\\utils\\Registro.db", "rw");
             while (arq.getFilePointer() < arq.length()) {
                 posId = arq.getFilePointer();
                 byte idAux = arq.readByte();
