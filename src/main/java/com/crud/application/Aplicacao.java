@@ -1,157 +1,231 @@
 package main.java.com.crud.application;
 
-// Classe Aplicacao que interage com o usuário pelo terminal
+import main.java.com.crud.dao.RegistroDAO;
+import main.java.com.crud.model.Registro;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Scanner;
 
-import main.java.com.crud.dao.RegistroDAO;
-import main.java.com.crud.dao.RegistroDAOImpl;
-import main.java.com.crud.model.Registro;
-
 public class Aplicacao {
+    private RegistroDAO registroDAO;
 
-    // Atributos da classe
-    private RegistroDAO dao; // Objeto DAO
-    private Scanner sc; // Objeto Scanner para ler do terminal
-
-    // Construtor da classe que recebe o caminho do arquivo binário
-    public Aplicacao(String path) {
-        dao = new RegistroDAOImpl(path); // Cria um objeto RegistroDAOImpl a partir do caminho
-        sc = new Scanner(System.in); // Cria um objeto Scanner para ler do terminal
+    public Aplicacao(RegistroDAO registroDAO) {
+        this.registroDAO = registroDAO;
     }
 
-    // Método para exibir o menu de opções para o usuário
     public void mostrarMenu() {
-        System.out.println("Escolha uma opção:");
-        System.out.println("1 - Inserir um novo Registro");
-        System.out.println("2 - Buscar um Registro pelo código do projeto");
-        System.out.println("3 - Atualizar um Registro pelo código do projeto");
-        System.out.println("4 - Excluir um Registro pelo código do projeto");
-        System.out.println("5 - Listar todos os Registros");
-        System.out.println("0 - Sair do programa");
+        System.out.println("\tCRUD de Registros");
+        System.out.println("1. Criar Registro");
+        System.out.println("2. Ler Registro");
+        System.out.println("3. Atualizar Registro");
+        System.out.println("4. Excluir Registro");
+        System.out.println("0. Sair");
+        System.out.print("Escolha uma opção: ");
     }
 
-    // Método para ler uma opção do usuário pelo terminal
     public int lerOpcao() {
-        int opcao = sc.nextInt(); // Lê um número inteiro do terminal
-        return opcao; // Retorna a opção lida
+        Scanner scanner = new Scanner(System.in);
+        return scanner.nextInt();
     }
 
-    public void carregarBaseDeDados(String caminhoArquivoCSV) {
-        try (BufferedReader br = new BufferedReader(new FileReader(caminhoArquivoCSV))) {
-            String linha;
-            while ((linha = br.readLine()) != null) {
-                // Processar cada linha do arquivo CSV e criar objetos Registro
-                String[] campos = linha.split(","); // Dividir a linha em campos
-                // Criar um objeto Registro com base nos campos e adicionar à base de dados
-                Registro registro = new Registro(campos[0], campos[1], Double.parseDouble(campos[2]),
-                        Double.parseDouble(campos[3]), Double.parseDouble(campos[4]),
-                        LocalDate.parse(campos[5]), LocalDate.parse(campos[6]), LocalDate.parse(campos[7]),
-                        campos[8], campos[9]);
-
-                dao.inserir(registro);
-            }
-            System.out.println("Carga da base de dados concluída com sucesso!");
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.err.println("Erro ao carregar a base de dados a partir do arquivo CSV.");
+    public static void criarRegistro() {
+        System.out.println("Você entrou no método criar.");
+        Scanner entrada = new Scanner(System.in);
+        System.out.println("Entre com o Setor:");
+        String setor = entrada.nextLine();
+        System.out.println("Entre com o Valor Orcado:");
+        double valorOrcado = entrada.nextDouble();
+        System.out.println("Entre com o Valor Negociado:");
+        double valorNegociado = entrada.nextDouble();
+        System.out.println("Entre com o Desconto Concedido:");
+        double descontoConcedido = entrada.nextDouble();
+        System.out.println("Entre com a Data de Ativacao (dd/MM/yyyy):");
+        String dataAtivacao = entrada.next();
+        System.out.println("Entre com a Data de Inicio (dd/MM/yyyy):");
+        String dataInicio = entrada.next();
+        System.out.println("Entre com a Data de Termino (dd/MM/yyyy):");
+        String dataTermino = entrada.next();
+        entrada.nextLine(); // Limpa o buffer
+        System.out.println("Entre com o Responsavel:");
+        String responsavel = entrada.nextLine();
+        System.out.println("Entre com o Status:");
+        String status = entrada.nextLine();
+        Registro novoProjeto = new Registro();
+        novoProjeto.criarObjeto(setor, valorOrcado, valorNegociado, descontoConcedido, dataAtivacao,
+                dataInicio, dataTermino, responsavel, status);
+        try {
+            CRUD<Registro> arquivoDeProjetos = new CRUD<>(Registro.class.getConstructor());
+            arquivoDeProjetos.Create(novoProjeto);
+            System.out.println("Projeto Criado com Sucesso!");
+        } catch (Exception e) {
+            System.out.println("Erro");
         }
     }
 
-    // Método para ler os Registros de um registro do usuário pelo terminal
-    public Registro lerRegistro() {
-        System.out.println("Digite o código do projeto:");
-        String codigo = sc.nextLine(); // Lê uma linha do terminal como código do projeto
-        System.out.println("Digite o setor do projeto:");
-        String setor = sc.nextLine(); // Lê uma linha do terminal como setor do projeto
-        System.out.println("Digite o valor orçado do projeto:");
-        double valorOrcado = sc.nextDouble(); // Lê um número real do terminal como valor orçado do projeto
-        System.out.println("Digite o valor negociado do projeto:");
-        double valorNegociado = sc.nextDouble(); // Lê um número real do terminal como valor negociado do projeto
-        System.out.println("Digite o desconto concedido do projeto:");
-        double descontoConcedido = sc.nextDouble(); // Lê um número real do terminal como desconto concedido do projeto
-        System.out.println("Digite a data de ativação do lead (no formato AAAA-MM-DD):");
-        LocalDate dataAtivacao = LocalDate.parse(sc.next()); // Lê uma data do terminal como data de ativação do lead
-        System.out.println("Digite a data de início do projeto (no formato AAAA-MM-DD):");
-        LocalDate dataInicio = LocalDate.parse(sc.next()); // Lê uma data do terminal como data de início do projeto
-        System.out.println("Digite a data de término do projeto (no formato AAAA-MM-DD):");
-        LocalDate dataTermino = LocalDate.parse(sc.next()); // Lê uma data do terminal como data de término do projeto
-        sc.nextLine(); // Limpa o buffer de entrada
-        System.out.println("Digite o responsável pelo projeto:");
-        String responsavel = sc.nextLine(); // Lê uma linha do terminal como responsável pelo projeto
-        System.out.println("Digite o status do projeto:");
-        String status = sc.nextLine(); // Lê uma linha do terminal como status do projeto
-        Registro r = new Registro(codigo, setor, valorOrcado, valorNegociado, descontoConcedido, dataAtivacao,
-                dataInicio, dataTermino, responsavel, status); // Cria um objeto Registro com os Registros lidos
-        return r; // Retorna o objeto Registro
+    public static void lerRegistro() {
+        System.out.println("Você entrou no método ler.");
+        System.out.println("Entre com o Código do Projeto:");
+        Scanner entrada = new Scanner(System.in);
+        byte idProjeto = entrada.nextByte();
+
+        try {
+            CRUD<Registro> arquivoDeProjetos = new CRUD<>(Registro.class.getConstructor());
+            Registro projetoProcurado = arquivoDeProjetos.Read(idProjeto);
+
+            if (projetoProcurado.getIdProjeto() != 0) {
+                System.out.println("PROJETO ENCONTRADO: ");
+                System.out.println("Código do Projeto: " + projetoProcurado.getIdProjeto());
+                System.out.println("Setor: " + projetoProcurado.getSetor());
+                System.out.println("Valor Orçado: " + projetoProcurado.getValorOrcado());
+                System.out.println("Valor Negociado: " + projetoProcurado.getValorNegociado());
+                System.out.println("Desconto Concedido: " + projetoProcurado.getDescontoConcedido());
+                System.out.println("Data de Ativação: " + projetoProcurado.getDataAtivacao());
+                System.out.println("Data de Início: " + projetoProcurado.getDataInicio());
+                System.out.println("Data de Término: " + projetoProcurado.getDataTermino());
+                System.out.println("Responsável: " + projetoProcurado.getResponsavel());
+                System.out.println("Status: " + projetoProcurado.getStatus());
+            } else {
+                System.out.println("PROJETO NÃO ENCONTRADO!");
+            }
+        } catch (Exception e) {
+            System.out.println("Erro");
+        }
     }
 
-    // Método para realizar a carga da base de Registros a partir de um arquivo CSV
-    public void executarOpcao(int opcao) {
-        switch (opcao) { // Verifica qual foi a opção escolhida
-            case 1: // Se for 1, insere um novo Registro no arquivo CSV
-                Registro r = lerRegistro(); // Lê os Registros do Registro do usuário pelo terminal
-                dao.inserir(r); // Insere o Registro no arquivo CSV usando o método do DAO
-                System.out.println("Registro inserido com sucesso!");
+    public static void atualizarRegistro() {
+        System.out.println("Você entrou no método atualizar.");
+        System.out.println("Entre com o Código do Projeto que deseja atualizar:");
+        Scanner entrada = new Scanner(System.in);
+        byte codigoProjeto = entrada.nextByte();
+
+        try {
+            CRUD<Registro> arquivoDeProjetos = new CRUD<>(Registro.class.getConstructor());
+            Registro projetoExistente = arquivoDeProjetos.Read(codigoProjeto);
+
+            if (projetoExistente.getIdProjeto() != 0) {
+                System.out.println("Entre com os novos dados do Projeto:");
+
+                // Solicite ao usuário os novos valores para o projeto
+                System.out.println("Novo Setor:");
+                entrada = new Scanner(System.in);
+                String novoSetor = entrada.nextLine();
+
+                System.out.println("Novo Valor Orçado:");
+                double novoValorOrcado = entrada.nextDouble();
+
+                System.out.println("Novo Valor Negociado:");
+                double novoValorNegociado = entrada.nextDouble();
+
+                System.out.println("Novo Desconto Concedido:");
+                double novoDescontoConcedido = entrada.nextDouble();
+
+                System.out.println("Nova Data de Ativação (dd/MM/yyyy):");
+                entrada = new Scanner(System.in);
+                String novaDataAtivacao = entrada.nextLine();
+
+                System.out.println("Nova Data de Início (dd/MM/yyyy):");
+                String novaDataInicio = entrada.nextLine();
+
+                System.out.println("Nova Data de Término (dd/MM/yyyy):");
+                String novaDataTermino = entrada.nextLine();
+
+                System.out.println("Novo Responsável:");
+                String novoResponsavel = entrada.nextLine();
+
+                System.out.println("Novo Status:");
+                String novoStatus = entrada.nextLine();
+
+                // Atualize os valores do projeto existente com os novos valores
+                projetoExistente.setSetor(novoSetor);
+                projetoExistente.setValorOrcado(novoValorOrcado);
+                projetoExistente.setValorNegociado(novoValorNegociado);
+                projetoExistente.setDescontoConcedido(novoDescontoConcedido);
+                projetoExistente
+                        .setDataAtivacao(LocalDate.parse(novaDataAtivacao, DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+                projetoExistente
+                        .setDataInicio(LocalDate.parse(novaDataInicio, DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+                projetoExistente
+                        .setDataTermino(LocalDate.parse(novaDataTermino, DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+                projetoExistente.setResponsavel(novoResponsavel);
+                projetoExistente.setStatus(novoStatus);
+
+                // Use o CRUD para atualizar o projeto no arquivo
+                arquivoDeProjetos.Update(projetoExistente);
+
+                System.out.println("Projeto Atualizado com Sucesso!");
+            } else {
+                System.out.println("Projeto Não Encontrado!");
+            }
+        } catch (Exception e) {
+            System.out.println("Erro");
+        }
+    }
+
+    public static void excluirRegistro() {
+        System.out.println("Você entrou no método excluir.");
+        System.out.println("Entre com o Código do Projeto que deseja excluir:");
+        Scanner entrada = new Scanner(System.in);
+        byte idProjeto = entrada.nextByte();
+
+        try {
+            CRUD<Registro> arquivoDeProjetos = new CRUD<>(Registro.class.getConstructor());
+            Registro projetoExistente = arquivoDeProjetos.Delete(idProjeto);
+
+            if (projetoExistente.getIdProjeto() != 0) {
+                System.out.println("Projeto Excluído com Sucesso!");
+            } else {
+                System.out.println("Projeto Não Encontrado!");
+            }
+        } catch (Exception e) {
+            System.out.println("Erro");
+        }
+    }
+
+    public static void executarOpcao(int opcao) {
+        switch (opcao) {
+            case 1:
+                criarRegistro(); // Chama o método criar da classe Menu
                 break;
-            case 2: // Se for 2, busca um Registro pelo código do projeto no arquivo CSV
-                System.out.println("Digite o código do projeto que deseja buscar:");
-                String codigo = sc.nextLine(); // Lê uma linha do terminal como código do projeto
-                r = dao.buscar(codigo); // Busca o Registro pelo código do projeto no arquivo CSV usando o
-                                        // método do
-                // DAO
-                if (r != null) { // Se o Registro não for nulo, exibe os seus Registros
-                    System.out.println("Registro encontrado:");
-                    System.out.println(r);
-                } else { // Se o Registro for nulo, informa que não foi encontrado
-                    System.out.println("Registro não encontrado!");
+            case 2:
+                lerRegistro(); // Chama o método ler da classe Menu
+                break;
+            case 3:
+                atualizarRegistro(); // Chama o método atualizar da classe Menu
+                break;
+            case 4:
+                excluirRegistro(); // Chama o método excluir da classe Menu
+                break;
+            case 5:
+                listarTodosRegistros(); // Chama um método que lista todos os registros
+                break;
+            case 0:
+                System.out.println("Encerrando o programa...");
+                System.exit(0);
+            default:
+                System.out.println("Opção inválida. Tente novamente.");
+        }
+    }
+
+    public static void listarTodosRegistros() {
+        try {
+            CRUD<Registro> arquivoDeRegistros = new CRUD<>(Registro.class.getConstructor());
+            List<Registro> registros = arquivoDeRegistros.listarTodosRegistros(); // Método que lista todos os registros
+
+            if (!registros.isEmpty()) {
+                System.out.println("Registros Encontrados:");
+                for (Registro registro : registros) {
+                    System.out.println(registro);
                 }
-                break;
-            case 3: // Se for 3, atualiza um Registro pelo código do projeto no arquivo CSV
-                System.out.println("Digite o código do projeto que deseja atualizar:");
-                codigo = sc.nextLine(); // Lê uma linha do terminal como código do projeto
-                r = dao.buscar(codigo); // Busca o Registro pelo código do projeto no arquivo CSV usando o
-                                        // método do
-                // DAO
-                if (r != null) { // Se o Registro não for nulo, atualiza os seus Registros
-                    System.out.println("Registro encontrado:");
-                    System.out.println(r);
-                    Registro novo = lerRegistro(); // Lê os novos Registros do Registro do usuário pelo terminal
-                    novo.setCodigo(codigo); // Mantém o mesmo código do Registro antigo
-                    dao.atualizar(novo); // Atualiza o Registro no arquivo CSV usando o método do DAO
-                    System.out.println("Registro atualizado com sucesso!");
-                } else { // Se o Registro for nulo, informa que não foi encontrado
-                    System.out.println("Registro não encontrado!");
-                }
-                break;
-            case 4: // Se for 4, exclui um Registro pelo código do projeto no arquivo CSV
-                System.out.println("Digite o código do projeto que deseja excluir:");
-                codigo = sc.nextLine(); // Lê uma linha do terminal como código do projeto
-                dao.excluir(codigo); // Exclui o Registro pelo código do projeto no arquivo CSV usando o método do
-                                     // DAO
-                System.out.println("Registro excluído com sucesso!");
-                break;
-            case 5: // Se for 5, lista todos os Registros do arquivo CSV
-                List<Registro> lista = dao.listar(); // Obtém a lista de Registros usando o método do DAO
-                if (!lista.isEmpty()) { // Se a lista não estiver vazia, exibe os seus elementos
-                    System.out.println("Registros:");
-                    for (Registro registro : lista) { // Para cada Registro na lista, exibe os seus Registros
-                        System.out.println(registro);
-                    }
-                } else { // Se a lista estiver vazia, informa que não há Registros
-                    System.out.println("Não há Registros!");
-                }
-                break;
-            case 0: // Se for 0, encerra o programa
-                System.out.println("Programa encerrado!");
-                break;
-            default: // Se for qualquer outro valor, informa que a opção é inválida
-                System.out.println("Opção inválida!");
+            } else {
+                System.out.println("Nenhum registro encontrado.");
+            }
+        } catch (Exception e) {
+            System.out.println("Erro ao listar registros.");
         }
     }
 }
