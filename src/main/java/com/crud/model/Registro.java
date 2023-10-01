@@ -13,6 +13,7 @@ import main.java.com.crud.dao.RegistroDAO;
 // Classe Registro que representa um objeto da base de dados
 public class Registro implements RegistroDAO {
     // Atributos da classe
+    public int tam;
     public byte idProjeto; // Índice do registro
     private String setor; // Setor do projeto
     private double valorOrcado; // Valor orçado do projeto
