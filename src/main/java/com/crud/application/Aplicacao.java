@@ -4,8 +4,11 @@ import main.java.com.crud.dao.RegistroDAO;
 import main.java.com.crud.model.Registro;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -18,22 +21,102 @@ public class Aplicacao {
         this.registroDAO = registroDAO;
     }
 
+    /**
+     * Função que mostra o menu de seleção
+     */
     public void mostrarMenu() {
         System.out.println("\tCRUD de Registros");
         System.out.println("1. Criar Registro");
         System.out.println("2. Ler Registro");
         System.out.println("3. Atualizar Registro");
         System.out.println("4. Excluir Registro");
+        System.out.println("5. Importar Base de Dados");
         System.out.println("0. Sair");
         System.out.print("Escolha uma opção: ");
     }
 
+    /**
+     * Função que lê a opção do menu escolhida
+     * 
+     * @return Retorna a opção digitada pelo usuário
+     */
     public int lerOpcao() {
         Scanner scanner = new Scanner(System.in);
         return scanner.nextInt();
     }
 
+    /**
+     * Função que converte a base de dados CSV em um arquivo .db
+     */
+    public static void importarBase() {
+        BufferedReader file = null;
+        String line = "";
+
+        String csvFileName = "src\\main\\java\\com\\crud\\db\\ProjetosBase.csv"; // Caminho do arquivo CSV
+        String dbFileName = "src\\main\\java\\com\\crud\\db\\Projetos.db"; // caminho do arquivo DB
+
+        try {
+            /**
+             * Abre os arquivos DB e CSV
+             */
+            file = new BufferedReader(new FileReader(csvFileName));
+            RandomAccessFile file_2 = new RandomAccessFile(dbFileName, "rw");
+
+            if (file_2.length() > 0) {
+                file_2.close();
+
+                File fp = new File(dbFileName);
+                fp.delete();
+                file_2 = new RandomAccessFile(dbFileName, "rw");
+            }
+            file_2.seek(0);
+            file_2.writeInt(0);
+            file_2.close();
+
+            line = file.readLine(); // Ignora a primeira linha de cabeçalho
+
+            /**
+             * Percorre todas as linhas do arquivo CSV e escreve no arquivo DB
+             */
+            while ((line = file.readLine()) != null) {
+                String[] content = line.split(",");
+                Registro csvRegistro = new Registro();
+                csvRegistro.criarObjeto(content[2].toString(),
+                        Double.parseDouble(content[3].toString()),
+                        Double.parseDouble(content[4].toString()),
+                        Double.parseDouble(content[5].toString()),
+                        content[6].toString(),
+                        content[7].toString(),
+                        content[8].toString(),
+                        content[9].toString(),
+                        content[10].toString());
+
+                try {
+                    CRUD<Registro> arquivoDeProjetos = new CRUD<>(Registro.class.getConstructor());
+                    arquivoDeProjetos.Create(csvRegistro);
+                    // System.out.println("Projeto Criado com Sucesso!");
+                } catch (Exception e) {
+                    System.out.println("Erro");
+                }
+            }
+            file.close();
+        } catch (FileNotFoundException e) {
+            System.out.println("Arquivo não encontrado!");
+        } catch (IOException e) {
+            System.out.println("ERROR");
+        }
+
+    }
+
+    /**
+     * Função para o usuário digitar os valores de criação
+     * de um novo registro
+     */
     public static void criarRegistro() {
+
+        /**
+         * Digita os parâmetros desejados do registro
+         */
         System.out.println("Você entrou no método criar.");
         Scanner entrada = new Scanner(System.in);
         System.out.println("Entre com o Setor:");
@@ -55,9 +138,18 @@ public class Aplicacao {
         String responsavel = entrada.nextLine();
         System.out.println("Entre com o Status:");
         String status = entrada.nextLine();
+
+        /**
+         * Cria um novo objeto Registro passando
+         * os parâmetros digitados pelo usuário
+         */
         Registro novoProjeto = new Registro();
         novoProjeto.criarObjeto(setor, valorOrcado, valorNegociado, descontoConcedido, dataAtivacao,
                 dataInicio, dataTermino, responsavel, status);
+
+        /**
+         * Cria o novo registro no arquivo de projetos
+         */
         try {
             CRUD<Registro> arquivoDeProjetos = new CRUD<>(Registro.class.getConstructor());
             arquivoDeProjetos.Create(novoProjeto);
@@ -67,6 +159,10 @@ public class Aplicacao {
         }
     }
 
+    /**
+     * Função para o usuário escolher o código do
+     * projeto que ele deseja ler.
+     */
     public static void lerRegistro() {
         System.out.println("Você entrou no método ler.");
         System.out.println("Entre com o Código do Projeto:");
@@ -77,19 +173,12 @@ public class Aplicacao {
             CRUD<Registro> arquivoDeProjetos = new CRUD<>(Registro.class.getConstructor());
             Registro projetoProcurado = arquivoDeProjetos.Read(idProjeto);
 
-            if (projetoProcurado.getIdProjeto() != 0) {
+            if (projetoProcurado.idProjeto != -1) {
                 System.out.println("PROJETO ENCONTRADO: ");
-                System.out.println("Código do Projeto: " + projetoProcurado.getIdProjeto());
-                System.out.println("Setor: " + projetoProcurado.getSetor());
-                System.out.println("Valor Orçado: " + projetoProcurado.getValorOrcado());
-                System.out.println("Valor Negociado: " + projetoProcurado.getValorNegociado());
-                System.out.println("Desconto Concedido: " + projetoProcurado.getDescontoConcedido());
-                System.out.println("Data de Ativação: " + projetoProcurado.getDataAtivacao());
-                System.out.println("Data de Início: " + projetoProcurado.getDataInicio());
-                System.out.println("Data de Término: " + projetoProcurado.getDataTermino());
-                System.out.println("Responsável: " + projetoProcurado.getResponsavel());
-                System.out.println("Status: " + projetoProcurado.getStatus());
-            } else {
+                System.out.println(projetoProcurado.toString());
+            }
+
+            else {
                 System.out.println("PROJETO NÃO ENCONTRADO!");
             }
         } catch (Exception e) {
@@ -97,6 +186,11 @@ public class Aplicacao {
         }
     }
 
+    /**
+     * Função para o usuário escolher o registro que ele
+     * deseja atualizar.
+     * 
+     */
     public static void atualizarRegistro() {
         System.out.println("Você entrou no método atualizar.");
         System.out.println("Entre com o Código do Projeto que deseja atualizar:");
@@ -166,6 +260,10 @@ public class Aplicacao {
         }
     }
 
+    /**
+     * Função para o usuário escolher o registro
+     * que deseja excluir
+     */
     public static void excluirRegistro() {
         System.out.println("Você entrou no método excluir.");
         System.out.println("Entre com o Código do Projeto que deseja excluir:");
@@ -186,6 +284,11 @@ public class Aplicacao {
         }
     }
 
+    /**
+     * Função que executa a opção escolhida no menu
+     * 
+     * @param opcao Opção escolhida
+     */
     public static void executarOpcao(int opcao) {
         switch (opcao) {
             case 1:
@@ -201,7 +304,7 @@ public class Aplicacao {
                 excluirRegistro(); // Chama o método excluir da classe Menu
                 break;
             case 5:
-                listarTodosRegistros(); // Chama um método que lista todos os registros
+                importarBase(); // Importa base de dados CSV
                 break;
             case 0:
                 System.out.println("Encerrando o programa...");

@@ -25,6 +25,10 @@ public class Registro implements RegistroDAO {
     private String status; // Status do projeto
 
     @Override
+    /**
+     * Método para criar um Objeto do tipo registro passando os valores de
+     * registro como parêmetros
+     */
     public void criarObjeto(String setor, double valorOrcado, double valorNegociado,
             double descontoConcedido, String dataAtivacao, String dataInicio, String dataTermino, String responsavel,
             String status) {
@@ -179,5 +183,4 @@ public class Registro implements RegistroDAO {
             e.printStackTrace();
         }
     }
-
 }
