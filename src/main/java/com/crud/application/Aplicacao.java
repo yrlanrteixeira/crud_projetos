@@ -31,6 +31,7 @@ public class Aplicacao {
         System.out.println("3. Atualizar Registro");
         System.out.println("4. Excluir Registro");
         System.out.println("5. Importar Base de Dados");
+        System.out.println("6. Ordenar");
         System.out.println("0. Sair");
         System.out.print("Escolha uma opção: ");
     }
@@ -94,7 +95,7 @@ public class Aplicacao {
                 try {
                     CRUD<Registro> arquivoDeProjetos = new CRUD<>(Registro.class.getConstructor());
                     arquivoDeProjetos.Create(csvRegistro);
-                    // System.out.println("Projeto Criado com Sucesso!");
+                    System.out.println("Projeto Criado com Sucesso!");
                 } catch (Exception e) {
                     System.out.println("Erro");
                 }
@@ -167,15 +168,26 @@ public class Aplicacao {
         System.out.println("Você entrou no método ler.");
         System.out.println("Entre com o Código do Projeto:");
         Scanner entrada = new Scanner(System.in);
-        byte idProjeto = entrada.nextByte();
+        int idProjeto = entrada.nextInt();
 
         try {
             CRUD<Registro> arquivoDeProjetos = new CRUD<>(Registro.class.getConstructor());
             Registro projetoProcurado = arquivoDeProjetos.Read(idProjeto);
 
             if (projetoProcurado.idProjeto != -1) {
+                // System.out.println("PROJETO ENCONTRADO: ");
+                // System.out.println(projetoProcurado.toString());
                 System.out.println("PROJETO ENCONTRADO: ");
-                System.out.println(projetoProcurado.toString());
+                System.out.println("Código do Projeto: " + projetoProcurado.getIdProjeto());
+                System.out.println("Setor: " + projetoProcurado.getSetor());
+                System.out.println("Valor Orçado: " + projetoProcurado.getValorOrcado());
+                System.out.println("Valor Negociado: " + projetoProcurado.getValorNegociado());
+                System.out.println("Desconto Concedido: " + projetoProcurado.getDescontoConcedido());
+                System.out.println("Data de Ativação: " + projetoProcurado.getDataAtivacao());
+                System.out.println("Data de Início: " + projetoProcurado.getDataInicio());
+                System.out.println("Data de Término: " + projetoProcurado.getDataTermino());
+                System.out.println("Responsável: " + projetoProcurado.getResponsavel());
+                System.out.println("Status: " + projetoProcurado.getStatus());
             }
 
             else {
@@ -195,7 +207,7 @@ public class Aplicacao {
         System.out.println("Você entrou no método atualizar.");
         System.out.println("Entre com o Código do Projeto que deseja atualizar:");
         Scanner entrada = new Scanner(System.in);
-        byte codigoProjeto = entrada.nextByte();
+        int codigoProjeto = entrada.nextInt();
 
         try {
             CRUD<Registro> arquivoDeProjetos = new CRUD<>(Registro.class.getConstructor());
@@ -268,7 +280,7 @@ public class Aplicacao {
         System.out.println("Você entrou no método excluir.");
         System.out.println("Entre com o Código do Projeto que deseja excluir:");
         Scanner entrada = new Scanner(System.in);
-        byte idProjeto = entrada.nextByte();
+        int idProjeto = entrada.nextInt();
 
         try {
             CRUD<Registro> arquivoDeProjetos = new CRUD<>(Registro.class.getConstructor());
@@ -306,6 +318,13 @@ public class Aplicacao {
             case 5:
                 importarBase(); // Importa base de dados CSV
                 break;
+            case 6:
+                Ordenacao o = new Ordenacao();
+                o.ordenaArquivo();
+                // o.reset();
+                System.out.println("ARQUIVO ORDENADO");
+                break;
+
             case 0:
                 System.out.println("Encerrando o programa...");
                 System.exit(0);

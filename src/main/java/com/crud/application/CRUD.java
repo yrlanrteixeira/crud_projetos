@@ -32,7 +32,7 @@ public class CRUD<T extends RegistroDAO> {
             Indice indice = new Indice();
             RandomAccessFile arq = new RandomAccessFile(
                     dbFileName, "rw"); // Abre o arquivo ou cria caso não exista
-            byte id = 1;
+            int id = 1;
             arq.seek(0);
 
             /**
@@ -40,20 +40,20 @@ public class CRUD<T extends RegistroDAO> {
              * senão lê o ultimo id criado e escreve o id + 1
              */
             if (arq.length() == 0) {
-                arq.writeByte(id);
+                arq.writeInt(id);
             } else {
-                id = arq.readByte();
+                id = arq.readInt();
                 id++;
                 arq.seek(0);
-                arq.writeByte(id);
+                arq.writeInt(id);
             }
 
             arq.seek(arq.length()); // Vai para a última posição do arquivo
             long posAtual = arq.getFilePointer();
             arq.writeByte(' '); // Escreve a lápide
             b = novoRegistro.toByteArray(); // Array de bytes que será o registro
-            arq.writeInt(b.length); // escreve o tamanho do arquivo
-            arq.writeByte(id);// Escreve o id
+            arq.writeByte(b.length); // escreve o tamanho do arquivo
+            arq.writeInt(id);// Escreve o id
             arq.write(b);// escreve o registro
             arq.close(); // fecha o registro
             indice.insereRegistro(id, posAtual);// Adiciona no index
@@ -68,7 +68,7 @@ public class CRUD<T extends RegistroDAO> {
      * @param id ID do registro a ser lido
      * @return Resgistro Lido
      */
-    public Registro Read(byte id) {
+    public Registro Read(int id) {
         byte[] b;
         Registro registroProcurado = new Registro();
         int tam;
@@ -78,6 +78,7 @@ public class CRUD<T extends RegistroDAO> {
                     dbFileName, "rw");
             long pos = indice.lerRegistro(id);
             if (pos == -1) {
+                System.out.println("ESTOU AQUI 1");
                 arq.close();
                 registroProcurado.idProjeto = -1;
                 return registroProcurado;
@@ -98,6 +99,7 @@ public class CRUD<T extends RegistroDAO> {
                     return registroProcurado;
                 }
             } else {
+                System.out.println("ESTOU AQUI 2");
                 arq.close();
                 registroProcurado.idProjeto = -1;
                 return registroProcurado;
@@ -106,6 +108,7 @@ public class CRUD<T extends RegistroDAO> {
             /**
              * Não encontrou o registro, então retorna
              */
+            System.out.println("ESTOU AQUI 3");
             arq.close();
             registroProcurado.idProjeto = -1;
             return registroProcurado;
@@ -161,7 +164,7 @@ public class CRUD<T extends RegistroDAO> {
                         b2 = registro.toByteArray();
                         if (tam >= b2.length) {
                             arq.seek(p);
-                            arq.writeByte(registro.idProjeto);
+                            arq.writeInt(registro.idProjeto);
                             arq.write(b2);
                         } else {
                             arq.seek(pLap);
@@ -170,7 +173,7 @@ public class CRUD<T extends RegistroDAO> {
                             pLap = arq.getFilePointer();
                             arq.writeByte(' ');
                             arq.writeInt(b2.length);
-                            arq.writeByte(registro.idProjeto);
+                            arq.writeInt(registro.idProjeto);
                             arq.write(b2);
                             index.atualizaRegistro(registro.idProjeto, pLap);
                         }
@@ -196,7 +199,7 @@ public class CRUD<T extends RegistroDAO> {
                         b2 = registro.toByteArray();
                         if (tam >= b2.length) {
                             arq.seek(p);
-                            arq.writeByte(registro.idProjeto);
+                            arq.writeInt(registro.idProjeto);
                             arq.write(b2);
                         } else {
                             arq.seek(pLap);
@@ -204,7 +207,7 @@ public class CRUD<T extends RegistroDAO> {
                             arq.seek(arq.length());
                             arq.writeByte(' ');
                             arq.writeInt(b2.length);
-                            arq.writeByte(registro.idProjeto);
+                            arq.writeInt(registro.idProjeto);
                             arq.write(b2);
                         }
                         break;
@@ -237,7 +240,7 @@ public class CRUD<T extends RegistroDAO> {
      * @param id ID do registro a ser excluido
      * @return o registro excluido
      */
-    public Registro Delete(byte id) {
+    public Registro Delete(int id) {
         byte[] b;
         Registro registroProcurado = new Registro();
         int tam;
@@ -311,7 +314,7 @@ public class CRUD<T extends RegistroDAO> {
             RandomAccessFile arq = new RandomAccessFile(
                     dbFileName, "rw");
             arq.seek(0);
-            byte id = arq.readByte();
+            int id = arq.readInt();
 
             while (arq.getFilePointer() < arq.length()) {
                 p = arq.getFilePointer();

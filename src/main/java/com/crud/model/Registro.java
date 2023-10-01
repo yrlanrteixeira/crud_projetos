@@ -13,7 +13,7 @@ import main.java.com.crud.dao.RegistroDAO;
 // Classe Registro que representa um objeto da base de dados
 public class Registro implements RegistroDAO {
     // Atributos da classe
-    public byte idProjeto; // Índice do registro
+    public int idProjeto; // Índice do registro
     private String setor; // Setor do projeto
     private double valorOrcado; // Valor orçado do projeto
     private double valorNegociado; // Valor negociado do projeto
@@ -23,6 +23,8 @@ public class Registro implements RegistroDAO {
     private LocalDate dataTermino; // Data de término do projeto
     private String responsavel; // Responsável pelo projeto
     private String status; // Status do projeto
+
+    public int tam;
 
     @Override
     /**
@@ -45,11 +47,11 @@ public class Registro implements RegistroDAO {
     }
 
     // Métodos get e set para cada atributo
-    public byte getIdProjeto() {
+    public int getIdProjeto() {
         return idProjeto;
     }
 
-    public void setIdProjeto(byte idProjeto) {
+    public void setIdProjeto(int idProjeto) {
         this.idProjeto = idProjeto;
     }
 
@@ -169,7 +171,7 @@ public class Registro implements RegistroDAO {
         ByteArrayInputStream bais = new ByteArrayInputStream(b);
         DataInputStream dis = new DataInputStream(bais);
         try {
-            this.idProjeto = dis.readByte();
+            this.idProjeto = dis.readInt();
             this.setor = dis.readUTF();
             this.valorOrcado = dis.readDouble();
             this.valorNegociado = dis.readDouble();
