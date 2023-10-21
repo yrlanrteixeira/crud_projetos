@@ -32,6 +32,7 @@ public class Aplicacao {
         System.out.println("4. Excluir Registro");
         System.out.println("5. Importar Base de Dados");
         System.out.println("6. Ordenar");
+        System.out.println("7. Listar");
         System.out.println("0. Sair");
         System.out.print("Escolha uma opção: ");
     }
@@ -297,6 +298,27 @@ public class Aplicacao {
     }
 
     /**
+     * Função para listar todos os registros
+     */
+    public static void listarTodosRegistros() {
+        try {
+            CRUD<Registro> arquivoDeRegistros = new CRUD<>(Registro.class.getConstructor());
+            List<Registro> registros = arquivoDeRegistros.listarTodosRegistros(); // Método que lista todos os registros
+
+            if (!registros.isEmpty()) {
+                System.out.println("Registros Encontrados:");
+                for (Registro registro : registros) {
+                    System.out.println(registro);
+                }
+            } else {
+                System.out.println("Nenhum registro encontrado.");
+            }
+        } catch (Exception e) {
+            System.out.println("Erro ao listar registros.");
+        }
+    }
+
+    /**
      * Função que executa a opção escolhida no menu
      * 
      * @param opcao Opção escolhida
@@ -324,30 +346,14 @@ public class Aplicacao {
                 // o.reset();
                 System.out.println("ARQUIVO ORDENADO");
                 break;
-
+            case 7:
+                listarTodosRegistros();
+                break;
             case 0:
                 System.out.println("Encerrando o programa...");
                 System.exit(0);
             default:
                 System.out.println("Opção inválida. Tente novamente.");
-        }
-    }
-
-    public static void listarTodosRegistros() {
-        try {
-            CRUD<Registro> arquivoDeRegistros = new CRUD<>(Registro.class.getConstructor());
-            List<Registro> registros = arquivoDeRegistros.listarTodosRegistros(); // Método que lista todos os registros
-
-            if (!registros.isEmpty()) {
-                System.out.println("Registros Encontrados:");
-                for (Registro registro : registros) {
-                    System.out.println(registro);
-                }
-            } else {
-                System.out.println("Nenhum registro encontrado.");
-            }
-        } catch (Exception e) {
-            System.out.println("Erro ao listar registros.");
         }
     }
 }
