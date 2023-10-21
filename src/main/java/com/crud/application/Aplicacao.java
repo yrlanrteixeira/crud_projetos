@@ -329,7 +329,6 @@ public class Aplicacao {
             case 5:
                 importarBase(); // Importa base de dados CSV
                 break;
-
             case 6:
                 Ordenacao o = new Ordenacao();
                 o.ordenaArquivo();
