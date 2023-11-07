@@ -9,16 +9,20 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.lang.reflect.Constructor;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
 public class Aplicacao {
     private RegistroDAO registroDAO;
+    private static IndiceInvertido indiceInvertido = new IndiceInvertido();
 
     public Aplicacao(RegistroDAO registroDAO) {
         this.registroDAO = registroDAO;
+
     }
 
     /**
@@ -286,15 +290,14 @@ public class Aplicacao {
         }
     }
 
-    /**
-     * Função para listar todos os registros
-     */
     public static void listarTodosRegistros() {
         try {
-            CRUD<Registro> arquivoDeRegistros = new CRUD<>(Registro.class.getConstructor());
+            Constructor<Registro> registroConstructor = Registro.class.getConstructor();
+            CRUD<Registro> arquivoDeRegistros = new CRUD<>(registroConstructor);
             List<Registro> registros = arquivoDeRegistros.listarTodosRegistros(); // Método que lista todos os registros
 
             if (!registros.isEmpty()) {
+                System.out.println("=====================");
                 System.out.println("Registros Encontrados:");
                 for (Registro registro : registros) {
                     System.out.println(registro);
@@ -303,7 +306,34 @@ public class Aplicacao {
                 System.out.println("Nenhum registro encontrado.");
             }
         } catch (Exception e) {
+            e.printStackTrace();
             System.out.println("Erro ao listar registros.");
+        }
+    }
+
+    public static void listaInvertida() {
+        Scanner entrada = new Scanner(System.in);
+        System.out.println("Digite o nome do responsável que deseja buscar:");
+        String responsavel = entrada.nextLine();
+
+        ArrayList<Integer> resultados = indiceInvertido.buscarResponsavel(responsavel);
+
+        if (!resultados.isEmpty()) {
+            System.out.println("Registros encontrados para o responsável '" + responsavel + "':");
+            for (Integer id : resultados) {
+                try {
+                    CRUD<Registro> arquivoDeProjetos = new CRUD<>(Registro.class.getConstructor());
+                    Registro registro = arquivoDeProjetos.Read(id.byteValue());
+
+                    if (registro.getIdProjeto() != -1) {
+                        System.out.println(registro);
+                    }
+                } catch (Exception e) {
+                    System.out.println("Erro ao ler o registro com ID: " + id);
+                }
+            }
+        } else {
+            System.out.println("Nenhum registro encontrado para o responsável '" + responsavel + "'.");
         }
     }
 
@@ -329,14 +359,16 @@ public class Aplicacao {
             case 5:
                 importarBase(); // Importa base de dados CSV
                 break;
+
             case 6:
                 Ordenacao o = new Ordenacao();
                 o.ordenaArquivo();
-                // o.reset();
-                System.out.println("ARQUIVO ORDENADO");
-                break;
+
             case 7:
                 listarTodosRegistros();
+                break;
+            case 8:
+                listaInvertida();
                 break;
             case 0:
                 System.out.println("Encerrando o programa...");
