@@ -17,8 +17,7 @@ public class CRUD<T extends RegistroDAO> {
         this.construtor = construtor;
     }
 
-    // private final String indiceFileName =
-    // "src\\main\\java\\com\\crud\\db\\Registro.db";
+    private final String indiceFileName = "src\\main\\java\\com\\crud\\db\\Registro.db";
     private final String dbFileName = "src\\main\\java\\com\\crud\\db\\Projetos.db";
 
     /**
@@ -304,33 +303,36 @@ public class CRUD<T extends RegistroDAO> {
     public List<Registro> listarTodosRegistros() {
         List<Registro> registros = new ArrayList<>();
         byte[] b;
-        Registro registroProcurado;
         int tam;
-        long p;
 
         try {
-            RandomAccessFile arq = new RandomAccessFile(
-                    dbFileName, "rw");
+            Indice indice = new Indice();
+            RandomAccessFile arq = new RandomAccessFile(dbFileName, "rw");
             arq.seek(0);
+
             byte id = arq.readByte();
+            if (id == 1) {
+                arq.close();
+                return registros; // O arquivo está vazio, não há registros para ler.
+            }
 
-            while (arq.getFilePointer() < arq.length()) {
-                p = arq.getFilePointer();
-                if (arq.readByte() == ' ') {
-                    tam = arq.readInt();
-                    b = new byte[tam + 1];
-                    arq.read(b);
-                    registroProcurado = new Registro();
-                    registroProcurado.setIdProjeto(id);
-                    registroProcurado.fromByteArray(b);
+            for (byte i = 1; i < id; i++) {
+                long pos = indice.lerRegistro(i);
+                if (pos != -1) {
+                    arq.seek(pos);
 
-                    if (registroProcurado.idProjeto != -1) {
-                        registros.add(registroProcurado);
+                    if (arq.readByte() == ' ') {
+                        tam = arq.readInt();
+                        b = new byte[tam + 1];
+                        arq.read(b);
+
+                        Registro registro = new Registro();
+                        registro.fromByteArray(b);
+
+                        if (registro.idProjeto == i) {
+                            registros.add(registro);
+                        }
                     }
-                } else {
-                    tam = arq.readInt();
-                    b = new byte[tam + 1];
-                    arq.read(b);
                 }
             }
 
