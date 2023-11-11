@@ -39,7 +39,9 @@ public class Aplicacao {
         System.out.println("5. Importar Base de Dados");
         System.out.println("6. Ordenar");
         System.out.println("7. Listar");
+        System.out.println("8. Lista Invertida");
         System.out.println("9. Compressão");
+        System.out.println("10. Descompressão");
         System.out.println("0. Sair");
         System.out.print("Escolha uma opção: ");
     }
@@ -340,19 +342,29 @@ public class Aplicacao {
         }
     }
 
+    /**
+     * Função para executar a compressão da base de dados
+     */
     public static void comprime() {
-        // System.out.println("Método de compressão do arquivo original");
-        // System.out.println("Digite a versão da compressão: ");
-        // String dbFileName = "src\\main\\java\\com\\crud\\db\\Projetos.db"; // caminho
-        // do arquivo DB
-        // String compressedFile =
-        // "src\\main\\java\\com\\crud\\db\\ProjetosCompressed.db";
+        System.out.println("Método de compressão do arquivo original");
+        System.out.println("\nDigite a versão da compressão: ");
+        Scanner entrada = new Scanner(System.in);
+        String versao = entrada.nextLine();
         Huffman huff = new Huffman();
-        // huff.compressFile(dbFileName, compressedFile);
-        // compressFile(dbFileName, compressedFile);
+        huff.compress(versao);
+        // huff.decompress();
+    }
 
-        huff.compress();
-        huff.decompress();
+    /**
+     * Função para executar a descompressão da base de dados
+     */
+    public static void descomprime() {
+        System.out.println("Método de descompressão");
+        System.out.println("\nDigite a versão: ");
+        Scanner entrada = new Scanner(System.in);
+        String versao = entrada.nextLine();
+        Huffman huff = new Huffman();
+        huff.decompress(versao);
     }
 
     /**
@@ -365,15 +377,19 @@ public class Aplicacao {
             case 1:
                 criarRegistro(); // Chama o método criar da classe Menu
                 break;
+
             case 2:
                 lerRegistro(); // Chama o método ler da classe Menu
                 break;
+
             case 3:
                 atualizarRegistro(); // Chama o método atualizar da classe Menu
                 break;
+
             case 4:
                 excluirRegistro(); // Chama o método excluir da classe Menu
                 break;
+
             case 5:
                 importarBase(); // Importa base de dados CSV
                 break;
@@ -385,6 +401,7 @@ public class Aplicacao {
             case 7:
                 listarTodosRegistros();
                 break;
+
             case 8:
                 listaInvertida();
                 break;
@@ -392,6 +409,11 @@ public class Aplicacao {
             case 9:
                 comprime();
                 break;
+
+            case 10:
+                descomprime();
+                break;
+
             case 0:
                 System.out.println("Encerrando o programa...");
                 System.exit(0);

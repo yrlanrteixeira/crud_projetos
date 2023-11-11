@@ -5,6 +5,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.PriorityQueue;
 
+/**
+ * Classe que representa um nó na arvore de Huffman
+ */
 class HuffmanNode implements Comparable<HuffmanNode> {
     char data;
     int frequency;
@@ -16,18 +19,33 @@ class HuffmanNode implements Comparable<HuffmanNode> {
     }
 }
 
+/**
+ * Classe de codificação e decodificação de Huffman
+ */
 public class Huffman {
 
-    public static void compress() {
-        String inputFile = "src\\main\\java\\com\\crud\\db\\Projetos.db";
-        String outputFile = "src\\main\\java\\com\\crud\\db\\ProjetosCompressed.db";
+    /**
+     * Função que realiza a compressão do arquivo db
+     * 
+     * @param versao Versao da compressão
+     */
+    public static void compress(String versao) {
+
+        // Começa a contar o tempo de execução da compressão
+        long tempoInicio = System.currentTimeMillis();
+
+        // Define o caminho do arquivo de saída comprimido
+        String outputFile = "src\\main\\java\\com\\crud\\db\\ProjetosCompressao" + versao + ".db";
 
         try {
+            // Abre o arquivo de entrada para leitura
             FileInputStream fis = new FileInputStream("src\\main\\java\\com\\crud\\db\\Projetos.db");
+
+            // Cria os fluxos de saída para o arquivo comprimido
             FileOutputStream fos = new FileOutputStream(outputFile);
             ObjectOutputStream oos = new ObjectOutputStream(fos);
 
-            // Ler o conteúdo do arquivo de entrada
+            // Ler o conteúdo do arquivo de entrada para um buffer de bytes
             byte[] inputBuffer = new byte[fis.available()];
             fis.read(inputBuffer);
             fis.close();
@@ -39,7 +57,7 @@ public class Huffman {
                 frequencyMap.put(c, frequencyMap.getOrDefault(c, 0) + 1);
             }
 
-            // Construir a árvore de Huffman
+            // Construir a árvore de Huffman usando uma fila de prioridade
             PriorityQueue<HuffmanNode> priorityQueue = new PriorityQueue<>();
             for (Map.Entry<Character, Integer> entry : frequencyMap.entrySet()) {
                 HuffmanNode node = new HuffmanNode();
@@ -51,6 +69,7 @@ public class Huffman {
             }
 
             while (priorityQueue.size() > 1) {
+                // Combina os dois nós de menor frequência para formar um novo nó
                 HuffmanNode left = priorityQueue.poll();
                 HuffmanNode right = priorityQueue.poll();
                 HuffmanNode parent = new HuffmanNode();
@@ -60,6 +79,7 @@ public class Huffman {
                 priorityQueue.add(parent);
             }
 
+            // Obtém a raiz da árvore de Huffman
             HuffmanNode root = priorityQueue.peek();
 
             // Construir a tabela de códigos de Huffman
@@ -69,7 +89,7 @@ public class Huffman {
             // Escrever a tabela de códigos no arquivo de saída
             oos.writeObject(huffmanCodes);
 
-            // Comprimir o arquivo e escrever no arquivo de saída
+            // Comprime o arquivo e escrever no arquivo de saída usando bits
             BitOutputStream bos = new BitOutputStream(fos);
             for (byte b : inputBuffer) {
                 char c = (char) b;
@@ -79,6 +99,7 @@ public class Huffman {
                 }
             }
 
+            // Fecha os fluxos de saída
             bos.close();
             oos.close();
 
@@ -86,27 +107,80 @@ public class Huffman {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        // Calcula e imprime o tempo de execução da compressão
+        long tempoExecucao = System.currentTimeMillis() - tempoInicio;
+        System.out.println(
+                "Tempo de execução: " + (float) tempoExecucao / 1000 + " segundos\n");
+
+        /**
+         * Calcula o ganho ou perda da compressão
+         */
+        try {
+            // Abre os arquivos original e comprimido para comparar tamanhos
+            RandomAccessFile arqOriginal = new RandomAccessFile("src\\main\\java\\com\\crud\\db\\Projetos.db", "r");
+            RandomAccessFile arqComprimido = new RandomAccessFile(
+                    "src\\main\\java\\com\\crud\\db\\ProjetosCompressao" + versao + ".db", "r");
+
+            // Calcula e imprime o ganho de compressão
+            double ganho = arqOriginal.length() * 1.0 / arqComprimido.length();
+            System.out.println("Tamanho dos arquivos: \n");
+            System.out.print("Original: " + arqOriginal.length() + " bytes | Comprimido: " + arqComprimido.length()
+                    + " bytes | ");
+            if (ganho == 1)
+                System.out.println("Não houve ganho nem perda.");
+            else if (ganho > 1)
+                System.out.printf("Houve ganho de %.2f%%\n", ((ganho - 1) * 100));
+            else
+                System.out.printf("Houve uma perda de %.2f%%\n", ganho * 100);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
+    /**
+     * Método recursivo para construir os códigos de Huffman
+     * 
+     * @param root         Nó raiz
+     * @param code
+     * @param huffmanCodes
+     */
     static void buildHuffmanCodes(HuffmanNode root, String code, Map<Character, String> huffmanCodes) {
+        // Se o nó for vazio retorna
         if (root == null) {
             return;
         }
 
+        // Se o nó é uma folha, adiciona o código ao mapa
         if (root.left == null && root.right == null) {
             huffmanCodes.put(root.data, code);
         }
 
+        // Percorre a árvore recursivamente
         buildHuffmanCodes(root.left, code + "0", huffmanCodes);
         buildHuffmanCodes(root.right, code + "1", huffmanCodes);
     }
 
-    public static void decompress() {
-        String compressedFile = "src\\main\\java\\com\\crud\\db\\ProjetosCompressed.db";
-        String outputFile = "src\\main\\java\\com\\crud\\db\\ProjetosDecompressed.db";
+    /**
+     * Função para descomprimir um arquivo
+     * 
+     * @param versao Versão do arquivo que deseja descomprimir
+     */
+    public static void decompress(String versao) {
+        // Registra o tempo de início da descompressão
+        long tempoInicio = System.currentTimeMillis();
+
+        // Define os caminhos dos arquivos comprimido e de saída
+        String compressedFile = "src\\main\\java\\com\\crud\\db\\ProjetosCompressao" + versao + ".db";
+        String outputFile = "src\\main\\java\\com\\crud\\db\\Projetos.db";
 
         try {
+            // Abre o arquivo comprimido para leitura
             FileInputStream fis = new FileInputStream(compressedFile);
+
+            // Cria os fluxos de saída para o arquivo descomprimido
             FileOutputStream fos = new FileOutputStream(outputFile);
             ObjectInputStream ois = new ObjectInputStream(fis);
 
@@ -116,7 +190,7 @@ public class Huffman {
             // Construir a árvore de Huffman a partir da tabela de códigos
             HuffmanNode root = buildHuffmanTree(huffmanCodes);
 
-            // Realizar a descompressão
+            // Realiza a descompressão
             BitInputStream bis = new BitInputStream(fis);
             HuffmanNode current = root;
             while (true) {
@@ -125,18 +199,21 @@ public class Huffman {
                     break; // Fim do arquivo
                 }
 
+                // Navega pela árvore com base nos bits
                 if (bit == 0) {
                     current = current.left;
                 } else {
                     current = current.right;
                 }
 
+                // Se chegar a uma folha, escreve o caractere no arquivo de saída
                 if (current.left == null && current.right == null) {
                     fos.write(current.data);
                     current = root;
                 }
             }
 
+            // Fecha os fluxos de entrada e saída
             bis.close();
             ois.close();
             fos.close();
@@ -145,8 +222,19 @@ public class Huffman {
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
+
+        // Calcula e imprime o tempo de execução do código
+        long tempoExecucao = System.currentTimeMillis() - tempoInicio;
+        System.out.println(
+                "Tempo de execução: " + (float) tempoExecucao / 1000 + " segundos\n");
     }
 
+    /**
+     * Método para construir a árvore de Huffman a partir da tabela de códigos
+     * 
+     * @param huffmanCodes Codigos Huffman
+     * @return
+     */
     static HuffmanNode buildHuffmanTree(Map<Character, String> huffmanCodes) {
         HuffmanNode root = new HuffmanNode();
         for (Map.Entry<Character, String> entry : huffmanCodes.entrySet()) {
@@ -154,6 +242,7 @@ public class Huffman {
             String code = entry.getValue();
             HuffmanNode current = root;
 
+            // Percorrer a árvore para criar os nós necessários
             for (char bit : code.toCharArray()) {
                 if (bit == '0') {
                     if (current.left == null) {
@@ -168,12 +257,16 @@ public class Huffman {
                 }
             }
 
+            // Atribuí o caractere ao nó folha
             current.data = c;
         }
         return root;
     }
 }
 
+/**
+ * Classe auxiliar para escrever bits em um arquivo de saída
+ */
 class BitOutputStream {
     private FileOutputStream fos;
     private int currentByte;
@@ -185,6 +278,12 @@ class BitOutputStream {
         this.numBitsFilled = 0;
     }
 
+    /**
+     * Método que escreve um bit no arquivo
+     * 
+     * @param bit
+     * @throws IOException
+     */
     public void writeBit(boolean bit) throws IOException {
         if (bit) {
             currentByte = (currentByte << 1) | 1;
@@ -194,6 +293,7 @@ class BitOutputStream {
 
         numBitsFilled++;
 
+        // Se o o byte está cheio, escreve o arquivo
         if (numBitsFilled == 8) {
             fos.write(currentByte);
             currentByte = 0;
@@ -201,6 +301,11 @@ class BitOutputStream {
         }
     }
 
+    /**
+     * Fecha fluxo de saída
+     * 
+     * @throws IOException
+     */
     public void close() throws IOException {
         while (numBitsFilled != 0) {
             writeBit(false);
@@ -209,6 +314,9 @@ class BitOutputStream {
     }
 }
 
+/**
+ * Classe auxiliar para ler bits de um arquivo de entrada
+ */
 class BitInputStream {
     private FileInputStream fis;
     private int currentByte;
@@ -220,6 +328,12 @@ class BitInputStream {
         this.numBitsFilled = 0;
     }
 
+    /**
+     * Função para ler um único bit do arquivo
+     * 
+     * @return
+     * @throws IOException
+     */
     public int readBit() throws IOException {
         if (numBitsFilled == 0) {
             currentByte = fis.read();
@@ -234,6 +348,11 @@ class BitInputStream {
         return bit;
     }
 
+    /**
+     * Fecha fluxo de entrada
+     * 
+     * @throws IOException
+     */
     public void close() throws IOException {
         fis.close();
     }
