@@ -1,73 +1,72 @@
 package main.java.com.crud.application;
 
-import java.io.RandomAccessFile;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class IndiceInvertido {
-    private HashMap<String, ArrayList<Integer>> indiceInvertido;
-    private final String dbFileName = "src\\main\\java\\com\\crud\\db\\Projetos.db";
+    private Map<String, List<Integer>> indiceInvertido;
+    private Map<String, Integer> contadorOcorrencias;
 
     public IndiceInvertido() {
-        indiceInvertido = new HashMap<>();
-        criarIndiceInvertido();
+        this.indiceInvertido = new HashMap<>();
+        this.contadorOcorrencias = new HashMap<>();
     }
 
-    private void criarIndiceInvertido() {
-        try {
-            RandomAccessFile arquivoProjetos = new RandomAccessFile(dbFileName, "rw");
-            int numeroLinha = 0;
-
-            while (arquivoProjetos.getFilePointer() < arquivoProjetos.length()) {
-                String nomeProjeto = arquivoProjetos.readUTF();
-                adicionarProjetoAoIndice(nomeProjeto, numeroLinha);
-                arquivoProjetos.readByte(); // Pula o byte do ID
-                // Pula os três bytes reservados
-                arquivoProjetos.readByte();
-                arquivoProjetos.readByte();
-                arquivoProjetos.readByte();
-                // Pula o valor long reservado
-                arquivoProjetos.readLong();
-                numeroLinha++;
-            }
-
-            arquivoProjetos.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+    /**
+     * Adiciona um índice ao índice invertido para o responsável especificado.
+     *
+     * @param responsavel Responsável associado ao índice.
+     * @param idProjeto   ID do projeto a ser adicionado ao índice.
+     */
+    public void adicionarIndice(String responsavel, int idProjeto) {
+        // Se o responsável já estiver no índice, apenas adicione o ID ao seu valor
+        if (indiceInvertido.containsKey(responsavel)) {
+            indiceInvertido.get(responsavel).add(idProjeto);
+        } else {
+            // Se não, crie uma nova entrada no índice com uma lista contendo o ID do
+            // projeto
+            List<Integer> listaIds = new ArrayList<>();
+            listaIds.add(idProjeto);
+            indiceInvertido.put(responsavel, listaIds);
+            contadorOcorrencias.put(responsavel, 1);
         }
     }
 
-    private void adicionarProjetoAoIndice(String nomeProjeto, int numeroLinha) {
-        String[] palavras = nomeProjeto.split(" ");
-
-        for (String palavra : palavras) {
-            palavra = palavra.toLowerCase(); // Converte a palavra para minúsculas
-            if (!indiceInvertido.containsKey(palavra)) {
-                indiceInvertido.put(palavra, new ArrayList<>());
-            }
-            indiceInvertido.get(palavra).add(numeroLinha);
-        }
-    }
-
-    public void imprimirIndiceInvertido() {
-        for (Map.Entry<String, ArrayList<Integer>> entrada : indiceInvertido.entrySet()) {
-            System.out.println(entrada.getKey() + ": " + entrada.getValue());
-        }
-    }
-
+    /**
+     * Realiza uma busca no índice invertido para um responsável especificado.
+     *
+     * @param responsavel Responsável a ser buscado no índice.
+     * @return Lista de IDs de projetos associados ao responsável.
+     */
     public ArrayList<Integer> buscarResponsavel(String responsavel) {
-        String[] palavras = responsavel.split(" ");
-        ArrayList<Integer> resultado = new ArrayList<>();
-
-        for (String palavra : palavras) {
-            palavra = palavra.toLowerCase(); // Converte a palavra para minúsculas
-            if (indiceInvertido.containsKey(palavra)) {
-                resultado.addAll(indiceInvertido.get(palavra));
-            }
+        if (indiceInvertido.containsKey(responsavel)) {
+            contadorOcorrencias.put(responsavel, contadorOcorrencias.get(responsavel) + 1);
+            return (ArrayList<Integer>) indiceInvertido.get(responsavel);
+        } else {
+            return new ArrayList<>();
         }
+    }
 
-        return resultado;
+    /**
+     * Retorna o número de ocorrências para um responsável.
+     *
+     * @param responsavel Responsável a ser consultado.
+     * @return Número de ocorrências do responsável.
+     */
+    public int obterContadorOcorrencias(String responsavel) {
+        return contadorOcorrencias.getOrDefault(responsavel, 0);
+    }
+
+    /**
+     * Imprime o índice invertido para fins de depuração.
+     */
+    public void imprimirIndiceInvertido() {
+        System.out.println("Índice Invertido:");
+        for (Map.Entry<String, List<Integer>> entry : indiceInvertido.entrySet()) {
+            System.out.print(entry.getKey() + ": ");
+            System.out.println(entry.getValue());
+        }
     }
 }

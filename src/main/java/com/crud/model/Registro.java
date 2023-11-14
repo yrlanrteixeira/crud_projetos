@@ -129,20 +129,18 @@ public class Registro implements RegistroDAO {
     // Método toString para retornar uma representação textual do objeto
     @Override
     public String toString() {
-        return String.format(
-                "Projetos:%n" +
-                        "Código: %s%n" +
-                        "Setor: %s%n" +
-                        "Valor Orçado: %.2f%n" +
-                        "Valor Negociado: %.2f%n" +
-                        "Desconto Concedido: %.2f%n" +
-                        "Data Ativação: %s%n" +
-                        "Data Início: %s%n" +
-                        "Data Término: %s%n" +
-                        "Responsável: %s%n" +
-                        "Status: %s%n",
-                idProjeto, setor, valorOrcado, valorNegociado, descontoConcedido, dataAtivacao,
-                dataInicio, dataTermino, responsavel, status);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        return "Código: " + this.idProjeto +
+                "\nSetor: " + this.setor +
+                "\nValor Orçado: " + this.valorOrcado +
+                "\nValor Negociado: " + this.valorNegociado +
+                "\nDesconto Concedido: " + this.descontoConcedido +
+                "\nData Ativação: " + this.dataAtivacao.format(formatter) +
+                "\nData Início: " + this.dataInicio.format(formatter) +
+                "\nData Término: " + this.dataTermino.format(formatter) +
+                "\nResponsável: " + this.responsavel +
+                "\nStatus: " + this.status +
+                "\n";
     }
 
     public byte[] toByteArray() {
