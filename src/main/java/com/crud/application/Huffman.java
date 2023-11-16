@@ -185,7 +185,7 @@ public class Huffman {
             ObjectInputStream ois = new ObjectInputStream(fis);
 
             // Ler a tabela de códigos de Huffman do arquivo comprimido
-            Map<Character, String> huffmanCodes = (Map<Character, String>) ois.readObject();
+            Map<Character, String> huffmanCodes = (Map<Character, String>) ois.readObject(); // Tabela de códigos
 
             // Construir a árvore de Huffman a partir da tabela de códigos
             HuffmanNode root = buildHuffmanTree(huffmanCodes);
