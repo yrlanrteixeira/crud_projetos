@@ -44,14 +44,14 @@ public class Ordenacao {
     }
 
     public void ordenaArquivo() {
-        byte maxId;
+        byte maxId; // maximo id do arquivo
         int cont = 0;
         int tam = 0;
         byte[] b;
         Registro r = new Registro();
         Boolean aux = true;
 
-        ArrayList<Registro> list = new ArrayList();
+        ArrayList<Registro> list = new ArrayList<>();
 
         try {
             RandomAccessFile arq = new RandomAccessFile(dbFileName, "rw"); // Abre arquivo de dados
@@ -257,8 +257,14 @@ public class Ordenacao {
             }
             arq.seek(0);
             arq.writeByte(ultimoId);
+
+            // fecha todos os arquivos
+            arq.close();
+            arqAux.close();
+            arqIndex.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
+
     }
 }

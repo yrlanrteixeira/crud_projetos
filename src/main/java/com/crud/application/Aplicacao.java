@@ -49,8 +49,8 @@ public class Aplicacao {
      * @return Retorna a opção digitada pelo usuário
      */
     public int lerOpcao() {
-        Scanner scanner = new Scanner(System.in);
-        return scanner.nextInt();
+        Scanner entrada = new Scanner(System.in);
+        return entrada.nextInt();
     }
 
     /**
@@ -299,6 +299,9 @@ public class Aplicacao {
         }
     }
 
+    /**
+     * Lista todos os registros presentes no arquivo de projetos.
+     */
     public static void listarTodosRegistros() {
         try {
             Constructor<Registro> registroConstructor = Registro.class.getConstructor();
@@ -320,6 +323,10 @@ public class Aplicacao {
         }
     }
 
+    /**
+     * Permite ao usuário buscar um responsável na lista invertida e exibe os
+     * registros associados.
+     */
     public static void listaInvertida() {
         Scanner entrada = new Scanner(System.in);
         System.out.println("Digite o nome do responsável que deseja buscar:");
@@ -364,7 +371,7 @@ public class Aplicacao {
     }
 
     /**
-     * Função para executar a compressão da base de dados
+     * Executa a compressão da base de dados utilizando o algoritmo de Huffman.
      */
     public static void comprime() {
         System.out.println("Método de compressão do arquivo original");
@@ -377,7 +384,7 @@ public class Aplicacao {
     }
 
     /**
-     * Função para executar a descompressão da base de dados
+     * Executa a descompressão da base de dados utilizando o algoritmo de Huffman.
      */
     public static void descomprime() {
         System.out.println("Método de descompressão");
