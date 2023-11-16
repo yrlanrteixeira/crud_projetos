@@ -2,10 +2,6 @@ package main.java.com.crud.application;
 
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Random;
-
 import main.java.com.crud.dao.Indice;
 import main.java.com.crud.model.Registro;
 
@@ -14,7 +10,7 @@ public class Ordenacao {
     final String dbFileName = "src\\main\\java\\com\\crud\\db\\Projetos.db";
     final String indiceFileName = "src\\main\\java\\com\\crud\\db\\Registro.db";
 
-    // com base no mod ,de 3 podemos receber até 4 valores, e cada um deles
+    // com base no mod de 3 podemos receber até 4 valores e cada um deles
     // significa um arquivo
     public RandomAccessFile qualArquivo(int i, RandomAccessFile arq1, RandomAccessFile arq2, RandomAccessFile arq3,
             RandomAccessFile arq4) {
@@ -230,13 +226,13 @@ public class Ordenacao {
         int ultimoId = 0;
         byte[] b;
         Indice index = new Indice();
-        System.out.println("ARQ - " + this.numArq);
+        System.out.println("ARQ - " + Ordenacao.numArq);
 
         try {
             RandomAccessFile arq = new RandomAccessFile(dbFileName, "rw");
             arq.setLength(0);
             arq.seek(0);
-            RandomAccessFile arqAux = new RandomAccessFile(this.numArq, "rw");
+            RandomAccessFile arqAux = new RandomAccessFile(Ordenacao.numArq, "rw");
             RandomAccessFile arqIndex = new RandomAccessFile(indiceFileName, "rw");
 
             arqIndex.setLength(0);
