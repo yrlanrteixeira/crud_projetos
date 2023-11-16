@@ -325,35 +325,41 @@ public class Aplicacao {
         System.out.println("Digite o nome do responsável que deseja buscar:");
         String responsavel = entrada.nextLine();
 
-        // Obtém os índices associados ao responsável da lista invertida
         ArrayList<Integer> resultados = indiceInvertido.buscarResponsavel(responsavel);
 
-        if (!resultados.isEmpty()) {
-            System.out.println("Número de ocorrências para o responsável '" + responsavel + "': " +
-                    indiceInvertido.obterContadorOcorrencias(responsavel));
-            System.out.println("Registros encontrados para o responsável '" + responsavel + "':");
+        if (resultados.isEmpty()) {
+            ArrayList<Integer> resultadosExistentes = indiceInvertido.buscarNosValoresExistentes(responsavel);
 
-            // Exibe os registros associados aos índices encontrados
-            for (Integer id : resultados) {
-                try {
-                    CRUD<Registro> arquivoDeProjetos = new CRUD<>(Registro.class.getConstructor());
-                    Registro registro = arquivoDeProjetos.Read(id.byteValue());
-
-                    if (registro.getIdProjeto() != -1) {
-                        // Aqui você pode imprimir todas as informações associadas ao projeto
-                        System.out.println("Código: " + registro.getIdProjeto());
-                        System.out.println("Setor: " + registro.getSetor());
-                        // Adicione outros campos conforme necessário
-
-                        // Adicione uma linha em branco para separar os registros
-                        System.out.println();
-                    }
-                } catch (Exception e) {
-                    System.out.println("Erro ao ler o registro com ID: " + id);
-                }
+            if (!resultadosExistentes.isEmpty()) {
+                int contadorOcorrencias = resultadosExistentes.size();
+                System.out.println("Número de ocorrências para o responsável '" + responsavel + "': " +
+                        contadorOcorrencias + " ocorrência(s)");
+                exibirRegistros(resultadosExistentes);
+            } else {
+                System.out.println("Nenhum registro encontrado para o responsável '" + responsavel + "'.");
             }
         } else {
-            System.out.println("Nenhum registro encontrado para o responsável '" + responsavel + "'.");
+            int contadorOcorrencias = resultados.size();
+            System.out.println("Número de ocorrências para o responsável '" + responsavel + "': " +
+                    contadorOcorrencias + " ocorrência(s)");
+            exibirRegistros(resultados);
+        }
+    }
+
+    private static void exibirRegistros(ArrayList<Integer> resultados) {
+        for (Integer id : resultados) {
+            try {
+                CRUD<Registro> arquivoDeProjetos = new CRUD<>(Registro.class.getConstructor());
+                Registro registro = arquivoDeProjetos.Read(id.byteValue());
+
+                if (registro.getIdProjeto() != -1) {
+                    System.out.println("Código: " + registro.getIdProjeto());
+                    System.out.println("Setor: " + registro.getSetor());
+                    System.out.println();
+                }
+            } catch (Exception e) {
+                System.out.println("Erro ao ler o registro com ID: " + id);
+            }
         }
     }
 

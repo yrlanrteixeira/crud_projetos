@@ -1,14 +1,28 @@
 package main.java.com.crud.application;
 
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import main.java.com.crud.model.Registro;
+
+/**
+ * Classe responsável por manter um índice invertido associado a responsáveis e
+ * IDs de projetos.
+ */
 public class IndiceInvertido {
+    // Mapa que associa cada responsável a uma lista de IDs de projetos
     private Map<String, List<Integer>> indiceInvertido;
+
+    // Contador de ocorrências para cada responsável
     private Map<String, Integer> contadorOcorrencias;
 
+    /**
+     * Construtor padrão da classe IndiceInvertido.
+     * Inicializa as estruturas de dados necessárias.
+     */
     public IndiceInvertido() {
         this.indiceInvertido = new HashMap<>();
         this.contadorOcorrencias = new HashMap<>();
@@ -21,16 +35,21 @@ public class IndiceInvertido {
      * @param idProjeto   ID do projeto a ser adicionado ao índice.
      */
     public void adicionarIndice(String responsavel, int idProjeto) {
-        // Se o responsável já estiver no índice, apenas adicione o ID ao seu valor
-        if (indiceInvertido.containsKey(responsavel)) {
-            indiceInvertido.get(responsavel).add(idProjeto);
-        } else {
-            // Se não, crie uma nova entrada no índice com uma lista contendo o ID do
-            // projeto
-            List<Integer> listaIds = new ArrayList<>();
-            listaIds.add(idProjeto);
-            indiceInvertido.put(responsavel, listaIds);
-            contadorOcorrencias.put(responsavel, 1);
+        // Converte o responsável para minúsculas para garantir consistência
+        responsavel = responsavel.toLowerCase();
+
+        // Adiciona o ID do projeto à lista associada ao responsável no índice invertido
+        List<Integer> listaIds = indiceInvertido.computeIfAbsent(responsavel, key -> {
+            contadorOcorrencias.put(key, 1); // Inicia o contador em 1 ao adicionar o primeiro índice
+            return new ArrayList<>();
+        });
+
+        listaIds.add(idProjeto);
+
+        // Incrementa o contador de ocorrências para o responsável apenas se for a
+        // primeira vez que o responsável é adicionado
+        if (listaIds.size() == 1) {
+            contadorOcorrencias.put(responsavel, contadorOcorrencias.getOrDefault(responsavel, 0) + 1);
         }
     }
 
@@ -41,12 +60,57 @@ public class IndiceInvertido {
      * @return Lista de IDs de projetos associados ao responsável.
      */
     public ArrayList<Integer> buscarResponsavel(String responsavel) {
-        if (indiceInvertido.containsKey(responsavel)) {
-            contadorOcorrencias.put(responsavel, contadorOcorrencias.get(responsavel) + 1);
-            return (ArrayList<Integer>) indiceInvertido.get(responsavel);
-        } else {
-            return new ArrayList<>();
+        String[] palavras = responsavel.split(" ");
+        ArrayList<Integer> resultado = new ArrayList<>();
+
+        for (String palavra : palavras) {
+            palavra = palavra.toLowerCase();
+            if (indiceInvertido.containsKey(palavra)) {
+                resultado.addAll(indiceInvertido.get(palavra));
+            }
         }
+
+        // Adicionar resultados da busca nos valores existentes no arquivo
+        resultado.addAll(buscarNosValoresExistentes(responsavel));
+
+        return resultado;
+    }
+
+    /**
+     * Realiza uma busca nos valores existentes no arquivo de dados por um
+     * responsável especificado.
+     *
+     * @param responsavel Responsável a ser buscado nos valores existentes.
+     * @return Lista de IDs de projetos associados ao responsável nos valores
+     *         existentes.
+     */
+    public ArrayList<Integer> buscarNosValoresExistentes(String responsavel) {
+        ArrayList<Integer> resultado = new ArrayList<>();
+
+        // Realizar a busca nos valores existentes no arquivo de dados
+        try {
+            Constructor<Registro> registroConstructor = Registro.class.getConstructor();
+            CRUD<Registro> arquivoDeRegistros = new CRUD<>(registroConstructor);
+            List<Registro> registros = arquivoDeRegistros.listarTodosRegistros();
+
+            for (Registro registro : registros) {
+                // Verifique se o responsável está presente no registro
+                if (registro.getResponsavel().equalsIgnoreCase(responsavel)) {
+                    resultado.add((int) registro.getIdProjeto());
+                } else {
+                    // Verifique se alguma data contém o responsável
+                    if (registro.getDataAtivacao().toString().equalsIgnoreCase(responsavel) ||
+                            registro.getDataInicio().toString().equalsIgnoreCase(responsavel) ||
+                            registro.getDataTermino().toString().equalsIgnoreCase(responsavel)) {
+                        resultado.add((int) registro.getIdProjeto());
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return resultado;
     }
 
     /**
@@ -56,6 +120,10 @@ public class IndiceInvertido {
      * @return Número de ocorrências do responsável.
      */
     public int obterContadorOcorrencias(String responsavel) {
+        // Converte o responsável para minúsculas para garantir consistência
+        responsavel = responsavel.toLowerCase();
+
+        // Obtém o contador de ocorrências do responsável
         return contadorOcorrencias.getOrDefault(responsavel, 0);
     }
 
