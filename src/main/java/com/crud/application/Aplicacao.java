@@ -5,9 +5,7 @@ import main.java.com.crud.model.Registro;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -24,7 +22,6 @@ public class Aplicacao {
 
     public Aplicacao(RegistroDAO registroDAO) {
         this.registroDAO = registroDAO;
-
     }
 
     /**
@@ -164,6 +161,10 @@ public class Aplicacao {
         try {
             CRUD<Registro> arquivoDeProjetos = new CRUD<>(Registro.class.getConstructor());
             arquivoDeProjetos.Create(novoProjeto);
+
+            // Adiciona o índice invertido para o responsável do novo projeto
+            indiceInvertido.adicionarIndice(responsavel, novoProjeto.getIdProjeto());
+
             System.out.println("Projeto Criado com Sucesso!");
         } catch (Exception e) {
             System.out.println("Erro");
@@ -286,6 +287,9 @@ public class Aplicacao {
             Registro projetoExistente = arquivoDeProjetos.Delete(idProjeto);
 
             if (projetoExistente.getIdProjeto() != 0) {
+                // Remove o índice invertido para o responsável do projeto excluído
+                indiceInvertido.buscarResponsavel(projetoExistente.getResponsavel()).remove(Integer.valueOf(idProjeto));
+
                 System.out.println("Projeto Excluído com Sucesso!");
             } else {
                 System.out.println("Projeto Não Encontrado!");
@@ -330,22 +334,39 @@ public class Aplicacao {
 
         ArrayList<Integer> resultados = indiceInvertido.buscarResponsavel(responsavel);
 
-        if (!resultados.isEmpty()) {
-            System.out.println("Registros encontrados para o responsável '" + responsavel + "':");
-            for (Integer id : resultados) {
-                try {
-                    CRUD<Registro> arquivoDeProjetos = new CRUD<>(Registro.class.getConstructor());
-                    Registro registro = arquivoDeProjetos.Read(id.byteValue());
+        if (resultados.isEmpty()) {
+            ArrayList<Integer> resultadosExistentes = indiceInvertido.buscarNosValoresExistentes(responsavel);
 
-                    if (registro.getIdProjeto() != -1) {
-                        System.out.println(registro);
-                    }
-                } catch (Exception e) {
-                    System.out.println("Erro ao ler o registro com ID: " + id);
-                }
+            if (!resultadosExistentes.isEmpty()) {
+                int contadorOcorrencias = resultadosExistentes.size();
+                System.out.println("Número de ocorrências para o responsável '" + responsavel + "': " +
+                        contadorOcorrencias + " ocorrência(s)");
+                exibirRegistros(resultadosExistentes);
+            } else {
+                System.out.println("Nenhum registro encontrado para o responsável '" + responsavel + "'.");
             }
         } else {
-            System.out.println("Nenhum registro encontrado para o responsável '" + responsavel + "'.");
+            int contadorOcorrencias = resultados.size();
+            System.out.println("Número de ocorrências para o responsável '" + responsavel + "': " +
+                    contadorOcorrencias + " ocorrência(s)");
+            exibirRegistros(resultados);
+        }
+    }
+
+    private static void exibirRegistros(ArrayList<Integer> resultados) {
+        for (Integer id : resultados) {
+            try {
+                CRUD<Registro> arquivoDeProjetos = new CRUD<>(Registro.class.getConstructor());
+                Registro registro = arquivoDeProjetos.Read(id.byteValue());
+
+                if (registro.getIdProjeto() != -1) {
+                    System.out.println("Código: " + registro.getIdProjeto());
+                    System.out.println("Setor: " + registro.getSetor());
+                    System.out.println();
+                }
+            } catch (Exception e) {
+                System.out.println("Erro ao ler o registro com ID: " + id);
+            }
         }
     }
 
