@@ -39,7 +39,6 @@ public class Aplicacao {
         System.out.println("8. Lista Invertida");
         System.out.println("9. Compressão");
         System.out.println("10. Descompressão");
-        System.out.println("11. Encontrar Padrão");
         System.out.println("0. Sair");
         System.out.print("Escolha uma opção: ");
     }
@@ -381,6 +380,7 @@ public class Aplicacao {
         String versao = entrada.nextLine();
         Huffman huff = new Huffman();
         huff.compress(versao);
+        // huff.decompress();
     }
 
     /**
@@ -393,24 +393,6 @@ public class Aplicacao {
         String versao = entrada.nextLine();
         Huffman huff = new Huffman();
         huff.decompress(versao);
-    }
-
-    /**
-     * Executa a busca de padrões no arquivo
-     */
-    public static void encontraPadrao() {
-        System.out.println("Método de casamento de padrões");
-        System.out.println("\nDigite o texto que você deseja encontrar: ");
-        Scanner entrada = new Scanner(System.in);
-        String padrao = entrada.nextLine();
-        CasamentoPadrao cas = new CasamentoPadrao();
-
-        try {
-            String texto = cas.lerArquivo();
-            cas.buscarPadrao(texto, padrao);
-        } catch (IOException e) {
-            System.err.println("Erro ao ler o arquivo: " + e.getMessage());
-        }
     }
 
     /**
@@ -442,27 +424,22 @@ public class Aplicacao {
 
             case 6:
                 Ordenacao o = new Ordenacao();
-                o.ordenaArquivo(); // Ordena o arquivo
-                break;
+                o.ordenaArquivo();
 
             case 7:
-                listarTodosRegistros(); // Chama o método de listar todos os registros
+                listarTodosRegistros();
                 break;
 
             case 8:
-                listaInvertida(); // Chama o método de lista invertida
+                listaInvertida();
                 break;
 
             case 9:
-                comprime(); // Chama o método de compressão
+                comprime();
                 break;
 
             case 10:
-                descomprime(); // Chama o método de descompressão
-                break;
-
-            case 11:
-                encontraPadrao(); // Chama o método de encontrar padrões
+                descomprime();
                 break;
 
             case 0:
@@ -470,7 +447,6 @@ public class Aplicacao {
                 System.exit(0);
             default:
                 System.out.println("Opção inválida. Tente novamente.");
-                break;
         }
     }
 }
