@@ -372,6 +372,7 @@ public class CRUD<T extends RegistroDAO> {
                         registro.fromByteArray(b);
 
                         if (registro.idProjeto == i) {
+                            registro.setResponsavel(Descriptografa(registro.getResponsavel()));
                             registros.add(registro);
                         }
                     }
