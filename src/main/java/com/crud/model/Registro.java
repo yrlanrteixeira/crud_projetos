@@ -131,33 +131,102 @@ public class Registro implements RegistroDAO {
 
     // Método toString para retornar uma representação textual do objeto
     @Override
+    // public String toString() {
+    // DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    // return "Código: " + this.idProjeto +
+    // "\nSetor: " + this.setor +
+    // "\nValor Orçado: " + this.valorOrcado +
+    // "\nValor Negociado: " + this.valorNegociado +
+    // "\nDesconto Concedido: " + this.descontoConcedido +
+    // "\nData Ativação: " + this.dataAtivacao.format(formatter) +
+    // "\nData Início: " + this.dataInicio.format(formatter) +
+    // "\nData Término: " + this.dataTermino.format(formatter) +
+    // "\nResponsável: " + this.responsavel +
+    // "\nStatus: " + this.status +
+    // "\n";
+    // }
+
     public String toString() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        return "Código: " + this.idProjeto +
-                "\nSetor: " + this.setor +
-                "\nValor Orçado: " + this.valorOrcado +
-                "\nValor Negociado: " + this.valorNegociado +
-                "\nDesconto Concedido: " + this.descontoConcedido +
-                "\nData Ativação: " + this.dataAtivacao.format(formatter) +
-                "\nData Início: " + this.dataInicio.format(formatter) +
-                "\nData Término: " + this.dataTermino.format(formatter) +
-                "\nResponsável: " + this.responsavel +
-                "\nStatus: " + this.status +
-                "\n";
+        return String.format(
+                "Projetos:%n" +
+                        "Código: %s%n" +
+                        "Setor: %s%n" +
+                        "Valor Orçado: %.2f%n" +
+                        "Valor Negociado: %.2f%n" +
+                        "Desconto Concedido: %.2f%n" +
+                        "Data Ativação: %s%n" +
+                        "Data Início: %s%n" +
+                        "Data Término: %s%n" +
+                        "Responsável: %s%n" +
+                        "Status: %s%n",
+                idProjeto, setor, valorOrcado, valorNegociado, descontoConcedido, dataAtivacao,
+                dataInicio, dataTermino, responsavel, status);
     }
+
+    // public byte[] toByteArray() {
+    // ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    // DataOutputStream dos = new DataOutputStream(baos);
+    // try {
+    // dos.writeByte(this.idProjeto); // Corrigindo para writeByte
+    // dos.writeUTF(this.setor);
+    // dos.writeDouble(this.valorOrcado);
+    // dos.writeDouble(this.valorNegociado);
+    // dos.writeDouble(this.descontoConcedido);
+    // dos.writeUTF(this.dataAtivacao.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+    // dos.writeUTF(this.dataInicio.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+    // dos.writeUTF(this.dataTermino.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+    // dos.writeUTF(this.responsavel);
+    // dos.writeUTF(this.status);
+    // return baos.toByteArray();
+    // } catch (IOException e) {
+    // e.printStackTrace();
+    // byte[] b = new byte[0];
+    // return b;
+    // }
+    // }
+
+    // public void fromByteArray(byte[] b) {
+    // ByteArrayInputStream bais = new ByteArrayInputStream(b);
+    // DataInputStream dis = new DataInputStream(bais);
+    // try {
+    // this.idProjeto = dis.readByte();
+    // this.setor = dis.readUTF();
+    // this.valorOrcado = dis.readDouble();
+    // this.valorNegociado = dis.readDouble();
+    // this.descontoConcedido = dis.readDouble();
+    // this.dataAtivacao = parseLocalDate(dis.readUTF());
+    // this.dataInicio = parseLocalDate(dis.readUTF());
+    // this.dataTermino = parseLocalDate(dis.readUTF());
+    // this.responsavel = dis.readUTF();
+    // this.status = dis.readUTF();
+    // } catch (IOException e) {
+    // e.printStackTrace();
+    // }
+    // }
+
+    // private LocalDate parseLocalDate(String dateString) {
+    // try {
+    // // Tenta o formato esperado
+    // return LocalDate.parse(dateString,
+    // DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+    // } catch (DateTimeParseException e) {
+    // // Se falhar, tenta outro formato
+    // return LocalDate.parse(dateString,
+    // DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+    // }
+    // }
 
     public byte[] toByteArray() {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DataOutputStream dos = new DataOutputStream(baos);
         try {
-            dos.writeByte(this.idProjeto); // Corrigindo para writeByte
             dos.writeUTF(this.setor);
             dos.writeDouble(this.valorOrcado);
             dos.writeDouble(this.valorNegociado);
             dos.writeDouble(this.descontoConcedido);
-            dos.writeUTF(this.dataAtivacao.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
-            dos.writeUTF(this.dataInicio.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
-            dos.writeUTF(this.dataTermino.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+            dos.writeUTF(this.dataAtivacao.toString()); // Convertendo LocalDate para String
+            dos.writeUTF(this.dataInicio.toString()); // Convertendo LocalDate para String
+            dos.writeUTF(this.dataTermino.toString()); // Convertendo LocalDate para String
             dos.writeUTF(this.responsavel);
             dos.writeUTF(this.status);
             return baos.toByteArray();
@@ -177,24 +246,13 @@ public class Registro implements RegistroDAO {
             this.valorOrcado = dis.readDouble();
             this.valorNegociado = dis.readDouble();
             this.descontoConcedido = dis.readDouble();
-            this.dataAtivacao = parseLocalDate(dis.readUTF());
-            this.dataInicio = parseLocalDate(dis.readUTF());
-            this.dataTermino = parseLocalDate(dis.readUTF());
+            this.dataAtivacao = LocalDate.parse(dis.readUTF()); // Convertendo String para LocalDate
+            this.dataInicio = LocalDate.parse(dis.readUTF()); // Convertendo String para LocalDate
+            this.dataTermino = LocalDate.parse(dis.readUTF()); // Convertendo String para LocalDate
             this.responsavel = dis.readUTF();
             this.status = dis.readUTF();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-
-    private LocalDate parseLocalDate(String dateString) {
-        try {
-            // Tenta o formato esperado
-            return LocalDate.parse(dateString, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-        } catch (DateTimeParseException e) {
-            // Se falhar, tenta outro formato
-            return LocalDate.parse(dateString, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        }
-    }
-
 }
