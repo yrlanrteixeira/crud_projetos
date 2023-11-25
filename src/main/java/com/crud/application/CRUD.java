@@ -17,16 +17,19 @@ import main.java.com.crud.dao.Indice;
 import main.java.com.crud.dao.RegistroDAO;
 
 import main.java.com.crud.model.Registro;
+import main.java.com.crud.security.CifraTransposicaoCesar;
 import main.java.com.crud.security.Criptografia;
 
 public class CRUD<T extends RegistroDAO> {
     Constructor<T> construtor;
-    private Criptografia criptografia;
+    // private Criptografia criptografia;
+    private CifraTransposicaoCesar cifraTransposicaoCesar;
 
     public CRUD(Constructor<T> construtor) throws NoSuchAlgorithmException, UnsupportedEncodingException,
             NoSuchProviderException, NoSuchPaddingException {
         this.construtor = construtor;
-        this.criptografia = new Criptografia();
+        // this.criptografia = new Criptografia();
+        this.cifraTransposicaoCesar = new CifraTransposicaoCesar();
     }
 
     // private final String indiceFileName =
@@ -49,9 +52,13 @@ public class CRUD<T extends RegistroDAO> {
 
             // Criptografa o responsável do projeto
 
+            // String respDescriptografado = novoRegistro.getResponsavel();
+            // String respCriptografada = criptografia.criptografar(respDescriptografado);
+            // novoRegistro.setResponsavel(respCriptografada);
+
             String respDescriptografado = novoRegistro.getResponsavel();
-            String respCriptografada = criptografia.criptografar(respDescriptografado);
-            novoRegistro.setResponsavel(respCriptografada);
+            // Aplica cifra de transposição César na responsável
+            novoRegistro.setResponsavel(CifraTransposicaoCesar.criptografar(respDescriptografado, 3));
 
             arq.seek(0);
 
@@ -114,7 +121,13 @@ public class CRUD<T extends RegistroDAO> {
                 registroProcurado.fromByteArray(b);
 
                 if (registroProcurado.idProjeto == id) {
-                    registroProcurado.setResponsavel(criptografia.descriptografar(registroProcurado.getResponsavel()));
+                    // registroProcurado.setResponsavel(criptografia.descriptografar(registroProcurado.getResponsavel()));
+                    // arq.close();
+                    // return registroProcurado;
+
+                    registroProcurado.setResponsavel(
+                            CifraTransposicaoCesar.descriptografar(registroProcurado.getResponsavel(), 3));
+
                     arq.close();
                     return registroProcurado;
                 }
@@ -352,7 +365,8 @@ public class CRUD<T extends RegistroDAO> {
 
                         if (registro.idProjeto == i) {
                             // Descriptografar antes de adicionar à lista
-                            registro.setResponsavel(criptografia.descriptografar(registro.getResponsavel()));
+                            registro.setResponsavel(
+                                    CifraTransposicaoCesar.descriptografar(registro.getResponsavel(), 3));
 
                             registros.add(registro);
                         }
