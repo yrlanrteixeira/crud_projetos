@@ -26,7 +26,7 @@ public class CRUD<T extends RegistroDAO> {
     public CRUD(Constructor<T> construtor) throws NoSuchAlgorithmException, UnsupportedEncodingException,
             NoSuchProviderException, NoSuchPaddingException {
         this.construtor = construtor;
-        this.criptografia = new Criptografia("1234567890123456", "1234567890123456");
+        this.criptografia = new Criptografia();
     }
 
     // private final String indiceFileName =
@@ -337,7 +337,7 @@ public class CRUD<T extends RegistroDAO> {
                 return registros; // O arquivo está vazio, não há registros para ler.
             }
 
-            for (byte i = 1; i < id; i++) {
+            for (byte i = 1; i <= id; i++) {
                 long pos = indice.lerRegistro(i);
                 if (pos != -1) {
                     arq.seek(pos);

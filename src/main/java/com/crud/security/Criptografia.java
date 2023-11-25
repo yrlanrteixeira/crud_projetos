@@ -1,51 +1,78 @@
 package main.java.com.crud.security;
 
+import java.io.*;
 import java.security.*;
 import javax.crypto.*;
 import javax.crypto.spec.*;
 
+/**
+ * A classe Criptografia realiza operações de criptografia e descriptografia
+ * usando o algoritmo AES.
+ */
 public class Criptografia {
+    // Algoritmo de criptografia utilizado
     private final String ALGORITMO = "AES/CTR/NoPadding";
 
+    // Chave secreta utilizada para criptografia e descriptografia
     private Key chaveAES;
+
+    // Parâmetro de especificação do vetor de inicialização (IV)
     private IvParameterSpec ivps;
 
-    public Criptografia(String key, String iv) {
-        byte[] ivArray = Conversoes.converteAsciiToArray(iv, false);
-        ivps = new IvParameterSpec(ivArray);
-
-        chaveAES = gerarChaveAES(key);
+    /**
+     * Construtor da classe Criptografia.
+     * Inicializa a chave AES carregando-a do arquivo ou gerando uma nova, e define
+     * o IV.
+     */
+    public Criptografia() {
+        this.chaveAES = ChaveCriptografia.carregarChave();
+        this.ivps = new IvParameterSpec(new byte[16]);
     }
 
-    public static Key gerarChaveAES(String key) {
-        // Certifique-se de que a chave tenha um comprimento válido (por exemplo, 32
-        // caracteres para uma chave de 256 bits)
-        while (key.length() < 32) {
-            key += key;
+    /**
+     * Criptografa um texto usando o algoritmo AES.
+     *
+     * @param texto O texto a ser criptografado.
+     * @return Uma representação hexadecimal do texto cifrado.
+     */
+    public String criptografar(String texto) {
+        try {
+            // Inicializa a cifra para operação de criptografia
+            Cipher cifra = Cipher.getInstance(ALGORITMO);
+            cifra.init(Cipher.ENCRYPT_MODE, chaveAES, ivps);
+
+            // Converte o texto cifrado para uma representação hexadecimal
+            byte[] textoCifradoBytes = cifra.doFinal(texto.getBytes());
+            return Conversoes.converteByteArrayParaStringHexadecimal(textoCifradoBytes);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
-
-        byte[] keyArray = Conversoes.converteHexStringToByteArray(key);
-        return new SecretKeySpec(keyArray, "AES");
     }
 
-    public String criptografar(String string) throws NoSuchAlgorithmException, NoSuchPaddingException,
-            InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
-        Cipher c = Cipher.getInstance(ALGORITMO);
-        c.init(Cipher.ENCRYPT_MODE, chaveAES, ivps);
+    /**
+     * Descriptografa um texto cifrado usando o algoritmo AES.
+     *
+     * @param textoCifrado Uma representação hexadecimal do texto cifrado.
+     * @return O texto original descriptografado.
+     */
+    public String descriptografar(String textoCifrado) {
+        try {
+            // Inicializa a cifra para operação de descriptografia
+            Cipher cifra = Cipher.getInstance(ALGORITMO);
+            cifra.init(Cipher.DECRYPT_MODE, chaveAES, ivps);
 
-        byte[] textoBytes = string.getBytes(); // Converte a string para bytes
-        byte[] textoCriptografado = c.doFinal(textoBytes);
-        return Conversoes.converteByteArrayToString(textoCriptografado);
+            // Converte a representação hexadecimal para um array de bytes
+            byte[] textoCifradoBytes = Conversoes.converteHexStringParaByteArray(textoCifrado);
+
+            // Descriptografa o array de bytes
+            byte[] textoOriginal = cifra.doFinal(textoCifradoBytes);
+
+            // Converte o array de bytes para uma string
+            return new String(textoOriginal);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
-
-    public String descriptografar(String textoCifrado) throws Exception {
-        Cipher c = Cipher.getInstance(ALGORITMO);
-        c.init(Cipher.DECRYPT_MODE, chaveAES, ivps);
-
-        byte[] textoCriptografado = Conversoes.converteHexStringToByteArray(textoCifrado);
-        byte[] msg = c.doFinal(textoCriptografado);
-
-        return new String(msg); // Converte os bytes de volta para uma string
-    }
-
 }

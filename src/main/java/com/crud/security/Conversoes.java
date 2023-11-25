@@ -1,8 +1,18 @@
 package main.java.com.crud.security;
 
+/**
+ * A classe Conversoes fornece métodos para converter entre diferentes
+ * representações de dados.
+ */
 public class Conversoes {
 
-    public static byte[] converteHexStringToByteArray(String string) {
+    /**
+     * Converte uma string hexadecimal para um array de bytes.
+     *
+     * @param string A string hexadecimal a ser convertida.
+     * @return Um array de bytes correspondente à representação hexadecimal.
+     */
+    public static byte[] converteHexStringParaByteArray(String string) {
         int tamanho = string.length() / 2;
         byte[] array = new byte[tamanho];
         for (int i = 0; i < tamanho; i++) {
@@ -11,7 +21,13 @@ public class Conversoes {
         return array;
     }
 
-    public static String converteByteArrayToString(byte[] array) {
+    /**
+     * Converte um array de bytes para uma string hexadecimal.
+     *
+     * @param array O array de bytes a ser convertido.
+     * @return Uma string hexadecimal correspondente ao array de bytes.
+     */
+    public static String converteByteArrayParaStringHexadecimal(byte[] array) {
         StringBuilder sb = new StringBuilder();
         for (byte b : array) {
             sb.append(String.format("%02x", b));
@@ -19,7 +35,17 @@ public class Conversoes {
         return sb.toString();
     }
 
-    public static byte[] converteAsciiToArray(String s, boolean padding) {
+    /**
+     * Converte uma string ASCII para um array de bytes, com opção de adicionar
+     * padding.
+     *
+     * @param s       A string ASCII a ser convertida.
+     * @param padding Indica se deve ser adicionado padding para atender a um
+     *                múltiplo de 16 bytes.
+     * @return Um array de bytes correspondente à string ASCII, opcionalmente com
+     *         padding.
+     */
+    public static byte[] converteAsciiParaArray(String s, boolean padding) {
         int tamanho = 0;
         if (padding) {
             tamanho = s.length() % 16;
