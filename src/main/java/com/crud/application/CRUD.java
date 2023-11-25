@@ -1,20 +1,32 @@
 package main.java.com.crud.application;
 
+import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Constructor;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.crypto.NoSuchPaddingException;
 
 import main.java.com.crud.dao.Indice;
 import main.java.com.crud.dao.RegistroDAO;
 
 import main.java.com.crud.model.Registro;
+import main.java.com.crud.security.Criptografia;
 
 public class CRUD<T extends RegistroDAO> {
     Constructor<T> construtor;
+    private Criptografia criptografia;
 
-    public CRUD(Constructor<T> construtor) {
+    public CRUD(Constructor<T> construtor) throws NoSuchAlgorithmException, UnsupportedEncodingException,
+            NoSuchProviderException, NoSuchPaddingException {
         this.construtor = construtor;
+        this.criptografia = new Criptografia();
     }
 
     // private final String indiceFileName =
@@ -22,42 +34,7 @@ public class CRUD<T extends RegistroDAO> {
     private final String dbFileName = "src\\main\\java\\com\\crud\\db\\Projetos.db";
 
     /**
-     * Função de criptografia de César para
-     * criptografar o responsável do projeto
-     * 
-     * @param resp Responsável do projeto
-     * @return Responsável criptografado
-     */
-    public String Criptografa(String resp) {
-        String respCriptografado = "";
-        int cifra = 128;
-
-        for (int i = 0; i < resp.length(); i++) {
-            respCriptografado += (char) (resp.charAt(i) + cifra);
-        }
-
-        return respCriptografado;
-    }
-
-    /**
-     * Função de descriptografia de César para
-     * descriptografar o responsável do projeto
-     * 
-     * @param resp Responsável do projeto
-     * @return Responsável descriptografado
-     */
-    public String Descriptografa(String resp) {
-        String respDescriptografado = "";
-        int cifra = 128;
-
-        for (int i = 0; i < resp.length(); i++) {
-            respDescriptografado += (char) (resp.charAt(i) - cifra);
-        }
-        return respDescriptografado;
-    }
-
-    /**
-     * Função paracriação de um novo registro no DB
+     * Função para criação de um novo registro no DB
      * 
      * @param novoRegistro Registro digitado pelo usuário
      */
@@ -71,8 +48,10 @@ public class CRUD<T extends RegistroDAO> {
             byte id = 1;
 
             // Criptografa o responsável do projeto
+
             String respDescriptografado = novoRegistro.getResponsavel();
-            novoRegistro.setResponsavel(Criptografa(respDescriptografado));
+            String respCriptografada = criptografia.criptografar(respDescriptografado);
+            novoRegistro.setResponsavel(respCriptografada);
 
             arq.seek(0);
 
@@ -135,7 +114,7 @@ public class CRUD<T extends RegistroDAO> {
                 registroProcurado.fromByteArray(b);
 
                 if (registroProcurado.idProjeto == id) {
-                    registroProcurado.setResponsavel(Descriptografa(registroProcurado.getResponsavel()));
+                    registroProcurado.setResponsavel(criptografia.descriptografar(registroProcurado.getResponsavel()));
                     arq.close();
                     return registroProcurado;
                 }
@@ -358,7 +337,7 @@ public class CRUD<T extends RegistroDAO> {
                 return registros; // O arquivo está vazio, não há registros para ler.
             }
 
-            for (byte i = 1; i < id; i++) {
+            for (byte i = 1; i <= id; i++) {
                 long pos = indice.lerRegistro(i);
                 if (pos != -1) {
                     arq.seek(pos);
@@ -372,7 +351,9 @@ public class CRUD<T extends RegistroDAO> {
                         registro.fromByteArray(b);
 
                         if (registro.idProjeto == i) {
-                            registro.setResponsavel(Descriptografa(registro.getResponsavel()));
+                            // Descriptografar antes de adicionar à lista
+                            registro.setResponsavel(criptografia.descriptografar(registro.getResponsavel()));
+
                             registros.add(registro);
                         }
                     }
