@@ -1,9 +1,17 @@
 package main.java.com.crud.application;
 
+import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Constructor;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.crypto.NoSuchPaddingException;
 
 import main.java.com.crud.dao.Indice;
 import main.java.com.crud.dao.RegistroDAO;
@@ -13,44 +21,17 @@ import main.java.com.crud.security.Criptografia;
 
 public class CRUD<T extends RegistroDAO> {
     Constructor<T> construtor;
+    private Criptografia criptografia;
 
-    public CRUD(Constructor<T> construtor) {
+    public CRUD(Constructor<T> construtor) throws NoSuchAlgorithmException, UnsupportedEncodingException,
+            NoSuchProviderException, NoSuchPaddingException {
         this.construtor = construtor;
+        this.criptografia = new Criptografia("1234567890123456", "1234567890123456");
     }
 
     // private final String indiceFileName =
     // "src\\main\\java\\com\\crud\\db\\Registro.db";
     private final String dbFileName = "src\\main\\java\\com\\crud\\db\\Projetos.db";
-
-    // /**
-    // * Função de criptografia de César para
-    // * criptografar o responsável do projeto
-    // *
-    // * @param resp Responsável do projeto
-    // * @return Responsável criptografado
-    // */
-    // public String Criptografa(String resp) {
-    // String respCriptografada = "";
-    // for (int i = 0; i < resp.length(); i++) {
-    // respCriptografada += (char) (resp.charAt(i) + 3);
-    // }
-    // return respCriptografada;
-    // }
-
-    // /**
-    // * Função de descriptografia de César para
-    // * descriptografar o responsável do projeto
-    // *
-    // * @param resp Responsável do projeto
-    // * @return Responsável descriptografado
-    // */
-    // public String Descriptografa(String resp) {
-    // String respDescriptografado = "";
-    // for (int i = 0; i < resp.length(); i++) {
-    // respDescriptografado += (char) (resp.charAt(i) - 3);
-    // }
-    // return respDescriptografado;
-    // }
 
     /**
      * Função para criação de um novo registro no DB
@@ -69,8 +50,7 @@ public class CRUD<T extends RegistroDAO> {
             // Criptografa o responsável do projeto
 
             String respDescriptografado = novoRegistro.getResponsavel();
-            String respCriptografada = Criptografia.criptografar(respDescriptografado, Criptografia.CHAVE_SECRETA,
-                    Criptografia.geraIv());
+            String respCriptografada = criptografia.criptografar(respDescriptografado);
             novoRegistro.setResponsavel(respCriptografada);
 
             arq.seek(0);
@@ -134,8 +114,7 @@ public class CRUD<T extends RegistroDAO> {
                 registroProcurado.fromByteArray(b);
 
                 if (registroProcurado.idProjeto == id) {
-                    registroProcurado.setResponsavel(Criptografia.descriptografar(registroProcurado.getResponsavel(),
-                            Criptografia.CHAVE_SECRETA, Criptografia.geraIv()));
+                    registroProcurado.setResponsavel(criptografia.descriptografar(registroProcurado.getResponsavel()));
                     arq.close();
                     return registroProcurado;
                 }
@@ -372,8 +351,9 @@ public class CRUD<T extends RegistroDAO> {
                         registro.fromByteArray(b);
 
                         if (registro.idProjeto == i) {
-                            registro.setResponsavel(Criptografia.descriptografar(registro.getResponsavel(),
-                                    Criptografia.CHAVE_SECRETA, Criptografia.geraIv()));
+                            // Descriptografar antes de adicionar à lista
+                            registro.setResponsavel(criptografia.descriptografar(registro.getResponsavel()));
+
                             registros.add(registro);
                         }
                     }
