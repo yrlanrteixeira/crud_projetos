@@ -62,6 +62,7 @@ public class Criptografia {
             Cipher cifra = Cipher.getInstance(ALGORITMO);
             cifra.init(Cipher.DECRYPT_MODE, chaveAES, ivps);
 
+            System.out.println("Texto cifrado: " + textoCifrado);
             // Converte a representação hexadecimal para um array de bytes
             byte[] textoCifradoBytes = Conversoes.converteHexStringParaByteArray(textoCifrado);
 
