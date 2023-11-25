@@ -72,7 +72,7 @@ public class Aplicacao {
             RandomAccessFile file_2 = new RandomAccessFile(dbFileName, "rw");
 
             if (file_2.length() > 0) {
-                file_2.close();
+                file_2.close(); 
 
                 File fp = new File(dbFileName);
                 fp.delete();
