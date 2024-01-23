@@ -1,6 +1,6 @@
 # CRUD de Registros
 
-Este repositório contém um aplicativo de CRUD (Create, Read, Update, Delete) de registros em Java, desenvolvido como parte de um trabalho prático da disciplina de AEDS III na Engenharia de Computação. O sistema permite que você crie, leia, atualize e exclua registros de projetos, bem como importar uma base de dados CSV e ordenar os registros.
+Este repositório contém um aplicativo de CRUD (Create, Read, Update, Delete) de registros em Java, desenvolvido como parte de um trabalho prático da disciplina de AEDS III na Engenharia de Computação. O sistema permite que você crie, leia, atualize e exclua registros de projetos, bem como importar uma base de dados CSV e ordenar os registros. O objetivo era estudar e aprender mais sobre operações em memória secundária, por isso todas as alterações são salvas em um arquivos de dados em que é possível recuperar os dados inseridos pelo usuário. Além de que os dados seriam armazenados e dessa forma não seriam perdidos ao fim do programa.
 
 ## Pré-requisitos
 
